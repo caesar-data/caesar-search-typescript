@@ -1,6 +1,6 @@
 {
   "name": "caesar-search",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Official TypeScript SDK for the Caesar search API — web search with provenance, built for agents.",
   "license": "MIT",
   "repository": {
