@@ -619,7 +619,7 @@ export type GetDocumentErrors = {
      */
     403: ErrorEnvelope;
     /**
-     * Document or passage not found.
+     * Document not found.
      */
     404: ErrorEnvelope;
     /**
@@ -630,6 +630,14 @@ export type GetDocumentErrors = {
      * Internal error.
      */
     500: ErrorEnvelope;
+    /**
+     * Search infrastructure unreachable.
+     */
+    502: ErrorEnvelope;
+    /**
+     * Search infrastructure unavailable.
+     */
+    503: ErrorEnvelope;
 };
 
 export type GetDocumentError = GetDocumentErrors[keyof GetDocumentErrors];
@@ -728,6 +736,14 @@ export type SearchErrors = {
      * Internal error.
      */
     500: ErrorEnvelope;
+    /**
+     * Search infrastructure unreachable.
+     */
+    502: ErrorEnvelope;
+    /**
+     * Search infrastructure unavailable.
+     */
+    503: ErrorEnvelope;
 };
 
 export type SearchError = SearchErrors[keyof SearchErrors];

@@ -13,7 +13,7 @@ import type {
 export * from "./errors";
 export type * from "./generated/types.gen";
 
-export const VERSION = "0.1.1";
+export const VERSION = "0.1.2";
 export const DEFAULT_BASE_URL = "https://search-api-staging-779189860552.europe-west1.run.app";
 
 const MAX_DELAY_MS = 8_000;
