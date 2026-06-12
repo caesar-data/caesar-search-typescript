@@ -1,0 +1,106 @@
+name: spec-sync
+
+# Polls the live public OpenAPI spec, regenerates the client when it changes,
+# classifies the change with oasdiff, and auto-releases non-breaking updates.
+# Breaking changes open a PR that waits for review. No monorepo credentials
+# required: the spec travels over the public spec URL.
+
+on:
+  schedule:
+    - cron: "37 */6 * * *"
+  workflow_dispatch: {}
+
+env:
+  SPEC_URL: https://search-api-staging-779189860552.europe-west1.run.app/openapi/public.json
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+      - name: Fetch live spec and detect drift
+        id: drift
+        run: |
+          curl -fsS "$SPEC_URL" -o /tmp/live-spec.json
+          jq -S . /tmp/live-spec.json > /tmp/live-normalized.json
+          jq -S . spec/openapi-public.json > /tmp/vendored-normalized.json
+          if cmp -s /tmp/live-normalized.json /tmp/vendored-normalized.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Classify the change
+        id: classify
+        if: steps.drift.outputs.changed == 'true'
+        run: |
+          docker run --rm -v /tmp:/tmp -v "$PWD/spec:/spec" ghcr.io/oasdiff/oasdiff \
+            breaking /spec/openapi-public.json /tmp/live-spec.json > /tmp/breaking.txt || true
+          if [ -s /tmp/breaking.txt ]; then
+            echo "breaking=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "breaking=false" >> "$GITHUB_OUTPUT"
+          fi
+          {
+            echo "summary<<EOF"
+            docker run --rm -v /tmp:/tmp -v "$PWD/spec:/spec" ghcr.io/oasdiff/oasdiff \
+              changelog /spec/openapi-public.json /tmp/live-spec.json || true
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      - name: Regenerate and test
+        if: steps.drift.outputs.changed == 'true'
+        run: |
+          cp /tmp/live-spec.json spec/openapi-public.json
+          bun install --frozen-lockfile
+          bun run generate
+          bun run lint
+          bun run typecheck
+          bun test
+          bun run build
+      - name: Auto-release (non-breaking)
+        if: steps.drift.outputs.changed == 'true' && steps.classify.outputs.breaking == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "caesar-spec-sync"
+          git config user.email "releases@caesar.xyz"
+          VERSION=$(node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            const [major, minor, patch] = pkg.version.split('.').map(Number);
+            const next = major + '.' + minor + '.' + (patch + 1);
+            pkg.version = next;
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+            const index = fs.readFileSync('src/index.ts', 'utf8');
+            fs.writeFileSync('src/index.ts', index.replace(/VERSION = \"[0-9.]+\"/, 'VERSION = \"' + next + '\"'));
+            console.log(next);
+          ")
+          git add -A
+          git commit -m "chore: regenerate from updated public spec (v${VERSION})"
+          git tag "v${VERSION}"
+          git push origin main "v${VERSION}"
+          # Tags pushed with GITHUB_TOKEN do not trigger workflows; dispatch
+          # the release workflow explicitly (workflow_dispatch is exempt).
+          gh workflow run release.yml --ref "v${VERSION}"
+      - name: Open review PR (breaking)
+        if: steps.drift.outputs.changed == 'true' && steps.classify.outputs.breaking == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SUMMARY: ${{ steps.classify.outputs.summary }}
+        run: |
+          git config user.name "caesar-spec-sync"
+          git config user.email "releases@caesar.xyz"
+          BRANCH="spec-sync/breaking-$(date -u +%Y%m%d%H%M)"
+          git checkout -b "$BRANCH"
+          git add -A
+          git commit -m "feat!: regenerate from updated public spec (breaking)"
+          git push origin "$BRANCH"
+          gh pr create --title "Breaking spec change: review required" \
+            --body "$(printf 'oasdiff classified this spec update as breaking.\n\n```\n%s\n```\n\nMerge and tag a minor release after review.' "$SUMMARY")" \
+            --label breaking || gh pr create --title "Breaking spec change: review required" \
+            --body "oasdiff classified this spec update as breaking. Merge and tag a minor release after review."

@@ -1,0 +1,69 @@
+{
+  "name": "caesar-search",
+  "version": "0.1.0",
+  "description": "Official TypeScript SDK for the Caesar search API — web search with provenance, built for agents.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caesar-data/caesar-search-typescript.git"
+  },
+  "homepage": "https://github.com/caesar-data/caesar-search-typescript#readme",
+  "bugs": "https://github.com/caesar-data/caesar-search-typescript/issues",
+  "keywords": [
+    "search",
+    "web-search",
+    "agents",
+    "ai",
+    "caesar"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./ai": {
+      "types": "./dist/ai.d.ts",
+      "import": "./dist/ai.js",
+      "require": "./dist/ai.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "AGENTS.md"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "ai": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "ai": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "test": "bun test",
+    "generate": "openapi-ts"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.16",
+    "@hey-api/openapi-ts": "^0.98.0",
+    "@types/bun": "^1.3.14",
+    "ai": "^6.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^6.0.3"
+  }
+}

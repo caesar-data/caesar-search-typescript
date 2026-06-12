@@ -1,0 +1,15 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "caesar-search TypeScript SDK",
+  "description": "Official TypeScript SDK for the Caesar search API: web search with provenance for agents",
+  "folders": [],
+  "excludeFolders": ["spec", "src/generated", "dist", "node_modules"],
+  "rules": [
+    "Instantiate new Caesar(); CAESAR_API_KEY is read from the environment",
+    "Methods are search(), read(), feedback(); the search size option is maxResults",
+    "Continue truncated reads with startChar instead of increasing maxChars",
+    "Catch AuthenticationError, RateLimitError, APIStatusError from caesar-search",
+    "Response fields are snake_case, matching the API",
+    "Vercel AI SDK tools are exported from caesar-search/ai via caesarTools()"
+  ]
+}
