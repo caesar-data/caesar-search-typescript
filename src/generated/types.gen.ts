@@ -294,18 +294,6 @@ export type SearchRequest = {
      */
     client_model?: string;
     /**
-     * Accepted for forward compatibility; no effect today. /v1/search returns snippets and passages only - read a result in full with /v1/document.
-     */
-    content?: {
-        [key: string]: unknown;
-    };
-    /**
-     * Reserved for internal evaluation harnesses; ignored for public callers.
-     */
-    debug?: {
-        [key: string]: unknown;
-    };
-    /**
      * Structured filters. Keys: country (two-letter code such as 'us' or 'de', scoping results to a market), language (two-letter code such as 'en'), exact_match (boolean; quotes the query so the index matches it verbatim).
      */
     filters?: {
@@ -325,10 +313,6 @@ export type SearchRequest = {
      * Retrieval budget and ranking mode: fast skips the reranking stage for the lowest latency; standard (default) and research rerank results, with research spending the largest retrieval budget.
      */
     mode?: 'fast' | 'standard' | 'research';
-    /**
-     * What the search is for, in plain language (e.g. 'find the canonical migration guide to cite'). Recorded for ranking evaluation; does not change retrieval today.
-     */
-    objective?: string;
     /**
      * The search query, phrased as the user or agent would ask it. Drives ranking and passage selection even when search_queries supplies a rewrite.
      */
@@ -521,18 +505,6 @@ export type SearchRequestWritable = {
      */
     client_model?: string;
     /**
-     * Accepted for forward compatibility; no effect today. /v1/search returns snippets and passages only - read a result in full with /v1/document.
-     */
-    content?: {
-        [key: string]: unknown;
-    };
-    /**
-     * Reserved for internal evaluation harnesses; ignored for public callers.
-     */
-    debug?: {
-        [key: string]: unknown;
-    };
-    /**
      * Structured filters. Keys: country (two-letter code such as 'us' or 'de', scoping results to a market), language (two-letter code such as 'en'), exact_match (boolean; quotes the query so the index matches it verbatim).
      */
     filters?: {
@@ -552,10 +524,6 @@ export type SearchRequestWritable = {
      * Retrieval budget and ranking mode: fast skips the reranking stage for the lowest latency; standard (default) and research rerank results, with research spending the largest retrieval budget.
      */
     mode?: 'fast' | 'standard' | 'research';
-    /**
-     * What the search is for, in plain language (e.g. 'find the canonical migration guide to cite'). Recorded for ranking evaluation; does not change retrieval today.
-     */
-    objective?: string;
     /**
      * The search query, phrased as the user or agent would ask it. Drives ranking and passage selection even when search_queries supplies a rewrite.
      */

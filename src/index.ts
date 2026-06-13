@@ -35,7 +35,6 @@ export interface CaesarOptions {
 export interface SearchOptions {
   mode?: "fast" | "standard" | "research";
   maxResults?: number;
-  objective?: string;
   sessionId?: string;
   /** Response shaping preset: ids_only | compact | standard | full. */
   verbosity?: "ids_only" | "compact" | "standard" | "full";
@@ -86,7 +85,6 @@ function buildSearchBody(query: string, options: SearchOptions): SearchRequest {
   const body: SearchRequest = { query, client_model: "ts-sdk" };
   if (options.mode) body.mode = options.mode;
   if (options.maxResults !== undefined) body.max_results = options.maxResults;
-  if (options.objective) body.objective = options.objective;
   if (options.sessionId) body.session_id = options.sessionId;
   const shape: Record<string, unknown> = {};
   if (options.verbosity) shape.verbosity = options.verbosity;
