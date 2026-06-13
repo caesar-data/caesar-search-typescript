@@ -56,19 +56,19 @@ export type DocumentContent = {
 
 export type DocumentContentRequest = {
     /**
-     * Returned content format.
+     * Returned content format: markdown (default) preserves document structure (headings, lists, code blocks); text is plain text.
      */
     format?: 'text' | 'markdown';
     /**
-     * Whether passage offsets should be included when available.
+     * When true, passages carry char_start/char_end offsets into the full extracted text when available, for character-precise citation.
      */
     include_offsets?: boolean;
     /**
-     * Maximum content.text characters to return.
+     * Maximum content.text characters to return. Longer documents set content.truncated true; continue with content.range.start_char instead of retrying with a larger cap.
      */
     max_chars?: number;
     /**
-     * Passage IDs to return when selection is passage_ids.
+     * Passage identifiers to return when selection is passage_ids, from a search result's passages or a previous read.
      */
     passage_ids?: Array<string> | null;
     /**
@@ -76,7 +76,7 @@ export type DocumentContentRequest = {
      */
     range?: ContentRange;
     /**
-     * Content selection strategy.
+     * How content.text is chosen: query_relevant (default) returns the passages most relevant to query; top_passages returns the document's leading passages; passage_ids returns exactly content.passage_ids; full_document returns the extracted text up to max_chars; none returns no content body.
      */
     selection?: 'none' | 'query_relevant' | 'top_passages' | 'passage_ids' | 'full_document';
 };
@@ -92,29 +92,29 @@ export type DocumentRequest = {
      */
     readonly $schema?: string;
     /**
-     * Canonical URL lookup key. Either doc_id or canonical_url is required.
+     * Canonical URL from a result's canonical_url; lookup alternative to doc_id. Either doc_id or canonical_url is required.
      */
     canonical_url?: string;
     /**
-     * Controls for returned document content.
+     * Controls for returned document content: selection strategy, format, size cap, and continuation range.
      */
     content?: DocumentContentRequest;
     /**
-     * Optional debug controls for internal evaluation.
+     * Reserved for internal evaluation harnesses; ignored for public callers.
      */
     debug?: {
         [key: string]: unknown;
     };
     /**
-     * Canonical document identifier. Either doc_id or canonical_url is required.
+     * Canonical document identifier (UUID) from a search result's doc_id; stable across searches and recrawls. Either doc_id or canonical_url is required.
      */
     doc_id?: string;
     /**
-     * Optional document sections to include.
+     * Sections to return. Omit it for everything available; otherwise an allowlist of passages, capture_history, and content (document metadata is always returned - send just metadata for a metadata-only read).
      */
     include?: Array<'metadata' | 'passages' | 'capture_history' | 'content'> | null;
     /**
-     * Optional query context for passage selection.
+     * Query context for passage selection: with content.selection query_relevant, content and passages are chosen for relevance to this text.
      */
     query?: string;
 };
@@ -178,7 +178,7 @@ export type FeedbackAgentContext = {
      */
     client_model?: string;
     /**
-     * Agent task type or evaluation bucket.
+     * Agent task type or evaluation bucket (e.g. 'coding' or 'research').
      */
     task_type?: string;
 };
@@ -189,39 +189,39 @@ export type FeedbackRequest = {
      */
     readonly $schema?: string;
     /**
-     * Optional calling-agent context.
+     * Optional calling-agent context for slicing feedback in evaluation.
      */
     agent_context?: FeedbackAgentContext;
     /**
-     * Document associated with the feedback event.
+     * Document the event concerns, from the result's doc_id.
      */
     doc_id?: string;
     /**
-     * Feedback event classification.
+     * What happened: result_helpful / result_not_helpful (the result did or did not advance the task), passage_used (a passage was used or cited), read_abandoned (opened but abandoned), duplicate_result, stale_result (outdated content), spam_or_low_quality, missing_expected_source (a source you expected did not appear), unsafe_or_policy_issue.
      */
     event_type: 'result_helpful' | 'result_not_helpful' | 'passage_used' | 'read_abandoned' | 'duplicate_result' | 'stale_result' | 'spam_or_low_quality' | 'missing_expected_source' | 'unsafe_or_policy_issue';
     /**
-     * Optional notes for human review or offline evaluation.
+     * Free-text context, recorded for human review and offline evaluation.
      */
     notes?: string;
     /**
-     * Passage associated with the feedback event.
+     * Specific passage the event concerns, from passages[].passage_id; most useful with passage_used.
      */
     passage_id?: string;
     /**
-     * Query associated with the feedback event.
+     * Query text the event relates to, useful when no search_id is available.
      */
     query?: string;
     /**
-     * One-based result rank, when applicable.
+     * One-based position the result had in the ranked list.
      */
     rank?: number;
     /**
-     * Search request identifier returned by /v1/search.
+     * The search_id returned by /v1/search. Ties feedback to the exact ranked list that produced the result, so ranking learns from the right context.
      */
     search_id?: string;
     /**
-     * Optional client session identifier.
+     * Session the event belongs to (UUID), matching session_id from earlier responses.
      */
     session_id?: string;
 };
@@ -264,11 +264,11 @@ export type RateLimit = {
 
 export type ResponseBudget = {
     /**
-     * Maximum serialized response size in characters. Roughly 4 characters per token.
+     * Maximum serialized response size in characters (roughly 4 characters per token, so 2000 is about 500 tokens).
      */
     max_chars_total?: number;
     /**
-     * What to do when the budget binds: shed payload in the documented order, or fail with response_too_large.
+     * What to do when the budget binds: shed (default) trims in a fixed order - passages, snippet tails, preset extras, then tail results, never below one result - and sets truncated plus a response_truncated warning; error fails with response_too_large instead.
      */
     on_exceed?: 'shed' | 'error';
 };
@@ -290,47 +290,47 @@ export type SearchRequest = {
      */
     readonly $schema?: string;
     /**
-     * Optional calling model identifier for analytics and tuning.
+     * Calling model identifier, recorded for analytics and ranking tuning.
      */
     client_model?: string;
     /**
-     * Optional content-return controls.
+     * Accepted for forward compatibility; no effect today. /v1/search returns snippets and passages only - read a result in full with /v1/document.
      */
     content?: {
         [key: string]: unknown;
     };
     /**
-     * Optional debug controls for internal evaluation.
+     * Reserved for internal evaluation harnesses; ignored for public callers.
      */
     debug?: {
         [key: string]: unknown;
     };
     /**
-     * Optional structured filters.
+     * Structured filters. Keys: country (two-letter code such as 'us' or 'de', scoping results to a market), language (two-letter code such as 'en'), exact_match (boolean; quotes the query so the index matches it verbatim).
      */
     filters?: {
         [key: string]: unknown;
     };
     /**
-     * Optional freshness requirements for time-sensitive queries.
+     * Recency requirements. Keys: published_after (RFC 3339 timestamp or YYYY-MM-DD date; only content published after it) and freshness (coarse window code pd, pw, pm, or py for past day, week, month, or year; ignored when published_after is set).
      */
     freshness_policy?: {
         [key: string]: unknown;
     };
     /**
-     * Maximum number of ranked results to return.
+     * Maximum number of ranked results to return. The response carries fewer when the index has fewer matches.
      */
     max_results?: number;
     /**
-     * Retrieval budget and ranking mode.
+     * Retrieval budget and ranking mode: fast skips the reranking stage for the lowest latency; standard (default) and research rerank results, with research spending the largest retrieval budget.
      */
     mode?: 'fast' | 'standard' | 'research';
     /**
-     * Optional task objective used by agents to shape retrieval.
+     * What the search is for, in plain language (e.g. 'find the canonical migration guide to cite'). Recorded for ranking evaluation; does not change retrieval today.
      */
     objective?: string;
     /**
-     * Original user or agent query.
+     * The search query, phrased as the user or agent would ask it. Drives ranking and passage selection even when search_queries supplies a rewrite.
      */
     query: string;
     /**
@@ -338,15 +338,15 @@ export type SearchRequest = {
      */
     response?: ResponseShape;
     /**
-     * Optional caller-provided query rewrites.
+     * Caller-provided query rewrites. The first entry replaces query as the text sent to the search index; query still drives reranking and passage selection. All entries are visible to the server-side query rewriter.
      */
     search_queries?: Array<string> | null;
     /**
-     * Optional client session identifier.
+     * Client session identifier (UUID). Groups related search, document, and feedback calls; equivalent to the X-Session-ID header. When omitted, the server generates one and echoes it back as session_id.
      */
     session_id?: string;
     /**
-     * Optional source inclusion and exclusion policy.
+     * Domain allow/deny policy. Keys: include_domains (array of domains; with require_domain_match true, results outside them are dropped, and a single entry is also sent to the index as a site: operator), exclude_domains (array of domains whose results are always dropped), require_domain_match (boolean). Domains match their subdomains; a leading www. is ignored.
      */
     source_policy?: {
         [key: string]: unknown;
@@ -412,29 +412,29 @@ export type Warning = {
 
 export type DocumentRequestWritable = {
     /**
-     * Canonical URL lookup key. Either doc_id or canonical_url is required.
+     * Canonical URL from a result's canonical_url; lookup alternative to doc_id. Either doc_id or canonical_url is required.
      */
     canonical_url?: string;
     /**
-     * Controls for returned document content.
+     * Controls for returned document content: selection strategy, format, size cap, and continuation range.
      */
     content?: DocumentContentRequest;
     /**
-     * Optional debug controls for internal evaluation.
+     * Reserved for internal evaluation harnesses; ignored for public callers.
      */
     debug?: {
         [key: string]: unknown;
     };
     /**
-     * Canonical document identifier. Either doc_id or canonical_url is required.
+     * Canonical document identifier (UUID) from a search result's doc_id; stable across searches and recrawls. Either doc_id or canonical_url is required.
      */
     doc_id?: string;
     /**
-     * Optional document sections to include.
+     * Sections to return. Omit it for everything available; otherwise an allowlist of passages, capture_history, and content (document metadata is always returned - send just metadata for a metadata-only read).
      */
     include?: Array<'metadata' | 'passages' | 'capture_history' | 'content'> | null;
     /**
-     * Optional query context for passage selection.
+     * Query context for passage selection: with content.selection query_relevant, content and passages are chosen for relevance to this text.
      */
     query?: string;
 };
@@ -469,39 +469,39 @@ export type ErrorEnvelopeWritable = {
 
 export type FeedbackRequestWritable = {
     /**
-     * Optional calling-agent context.
+     * Optional calling-agent context for slicing feedback in evaluation.
      */
     agent_context?: FeedbackAgentContext;
     /**
-     * Document associated with the feedback event.
+     * Document the event concerns, from the result's doc_id.
      */
     doc_id?: string;
     /**
-     * Feedback event classification.
+     * What happened: result_helpful / result_not_helpful (the result did or did not advance the task), passage_used (a passage was used or cited), read_abandoned (opened but abandoned), duplicate_result, stale_result (outdated content), spam_or_low_quality, missing_expected_source (a source you expected did not appear), unsafe_or_policy_issue.
      */
     event_type: 'result_helpful' | 'result_not_helpful' | 'passage_used' | 'read_abandoned' | 'duplicate_result' | 'stale_result' | 'spam_or_low_quality' | 'missing_expected_source' | 'unsafe_or_policy_issue';
     /**
-     * Optional notes for human review or offline evaluation.
+     * Free-text context, recorded for human review and offline evaluation.
      */
     notes?: string;
     /**
-     * Passage associated with the feedback event.
+     * Specific passage the event concerns, from passages[].passage_id; most useful with passage_used.
      */
     passage_id?: string;
     /**
-     * Query associated with the feedback event.
+     * Query text the event relates to, useful when no search_id is available.
      */
     query?: string;
     /**
-     * One-based result rank, when applicable.
+     * One-based position the result had in the ranked list.
      */
     rank?: number;
     /**
-     * Search request identifier returned by /v1/search.
+     * The search_id returned by /v1/search. Ties feedback to the exact ranked list that produced the result, so ranking learns from the right context.
      */
     search_id?: string;
     /**
-     * Optional client session identifier.
+     * Session the event belongs to (UUID), matching session_id from earlier responses.
      */
     session_id?: string;
 };
@@ -517,47 +517,47 @@ export type FeedbackResponseWritable = {
 
 export type SearchRequestWritable = {
     /**
-     * Optional calling model identifier for analytics and tuning.
+     * Calling model identifier, recorded for analytics and ranking tuning.
      */
     client_model?: string;
     /**
-     * Optional content-return controls.
+     * Accepted for forward compatibility; no effect today. /v1/search returns snippets and passages only - read a result in full with /v1/document.
      */
     content?: {
         [key: string]: unknown;
     };
     /**
-     * Optional debug controls for internal evaluation.
+     * Reserved for internal evaluation harnesses; ignored for public callers.
      */
     debug?: {
         [key: string]: unknown;
     };
     /**
-     * Optional structured filters.
+     * Structured filters. Keys: country (two-letter code such as 'us' or 'de', scoping results to a market), language (two-letter code such as 'en'), exact_match (boolean; quotes the query so the index matches it verbatim).
      */
     filters?: {
         [key: string]: unknown;
     };
     /**
-     * Optional freshness requirements for time-sensitive queries.
+     * Recency requirements. Keys: published_after (RFC 3339 timestamp or YYYY-MM-DD date; only content published after it) and freshness (coarse window code pd, pw, pm, or py for past day, week, month, or year; ignored when published_after is set).
      */
     freshness_policy?: {
         [key: string]: unknown;
     };
     /**
-     * Maximum number of ranked results to return.
+     * Maximum number of ranked results to return. The response carries fewer when the index has fewer matches.
      */
     max_results?: number;
     /**
-     * Retrieval budget and ranking mode.
+     * Retrieval budget and ranking mode: fast skips the reranking stage for the lowest latency; standard (default) and research rerank results, with research spending the largest retrieval budget.
      */
     mode?: 'fast' | 'standard' | 'research';
     /**
-     * Optional task objective used by agents to shape retrieval.
+     * What the search is for, in plain language (e.g. 'find the canonical migration guide to cite'). Recorded for ranking evaluation; does not change retrieval today.
      */
     objective?: string;
     /**
-     * Original user or agent query.
+     * The search query, phrased as the user or agent would ask it. Drives ranking and passage selection even when search_queries supplies a rewrite.
      */
     query: string;
     /**
@@ -565,15 +565,15 @@ export type SearchRequestWritable = {
      */
     response?: ResponseShape;
     /**
-     * Optional caller-provided query rewrites.
+     * Caller-provided query rewrites. The first entry replaces query as the text sent to the search index; query still drives reranking and passage selection. All entries are visible to the server-side query rewriter.
      */
     search_queries?: Array<string> | null;
     /**
-     * Optional client session identifier.
+     * Client session identifier (UUID). Groups related search, document, and feedback calls; equivalent to the X-Session-ID header. When omitted, the server generates one and echoes it back as session_id.
      */
     session_id?: string;
     /**
-     * Optional source inclusion and exclusion policy.
+     * Domain allow/deny policy. Keys: include_domains (array of domains; with require_domain_match true, results outside them are dropped, and a single entry is also sent to the index as a site: operator), exclude_domains (array of domains whose results are always dropped), require_domain_match (boolean). Domains match their subdomains; a leading www. is ignored.
      */
     source_policy?: {
         [key: string]: unknown;
