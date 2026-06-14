@@ -564,6 +564,10 @@ export type GetDocumentData = {
     body: DocumentRequestWritable;
     headers?: {
         /**
+         * Optional bearer token for keyed access. Omit this header for anonymous access.
+         */
+        Authorization?: string;
+        /**
          * Optional client session identifier.
          */
         'X-Session-ID'?: string;
@@ -623,6 +627,10 @@ export type RecordFeedbackData = {
     body: FeedbackRequestWritable;
     headers?: {
         /**
+         * Optional bearer token for keyed access. Omit this header for anonymous access.
+         */
+        Authorization?: string;
+        /**
          * Optional client session identifier.
          */
         'X-Session-ID'?: string;
@@ -673,6 +681,10 @@ export type RecordFeedbackResponse = RecordFeedbackResponses[keyof RecordFeedbac
 export type SearchData = {
     body: SearchRequestWritable;
     headers?: {
+        /**
+         * Optional bearer token for keyed access. Omit this header for anonymous access.
+         */
+        Authorization?: string;
         /**
          * Optional client session identifier.
          */
