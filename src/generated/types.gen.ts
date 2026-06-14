@@ -579,7 +579,7 @@ export type GetDocumentErrors = {
      */
     400: ErrorEnvelope;
     /**
-     * Missing or invalid API key.
+     * Invalid API key, or missing API key when keyless access is disabled.
      */
     401: ErrorEnvelope;
     /**
@@ -638,7 +638,7 @@ export type RecordFeedbackErrors = {
      */
     400: ErrorEnvelope;
     /**
-     * Missing or invalid API key.
+     * Invalid API key, or missing API key when keyless access is disabled.
      */
     401: ErrorEnvelope;
     /**
@@ -689,7 +689,7 @@ export type SearchErrors = {
      */
     400: ErrorEnvelope;
     /**
-     * Missing or invalid API key.
+     * Invalid API key, or missing API key when keyless access is disabled.
      */
     401: ErrorEnvelope;
     /**
