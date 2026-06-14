@@ -24,7 +24,6 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
  * Inspect one canonical document and retrieve selected content.
  */
 export const getDocument = <ThrowOnError extends boolean = false>(options: Options<GetDocumentData, ThrowOnError>): RequestResult<GetDocumentResponses, GetDocumentErrors, ThrowOnError> => (options.client ?? client).post<GetDocumentResponses, GetDocumentErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/document',
     ...options,
     headers: {
@@ -39,7 +38,6 @@ export const getDocument = <ThrowOnError extends boolean = false>(options: Optio
  * Persist an agent or evaluation feedback event.
  */
 export const recordFeedback = <ThrowOnError extends boolean = false>(options: Options<RecordFeedbackData, ThrowOnError>): RequestResult<RecordFeedbackResponses, RecordFeedbackErrors, ThrowOnError> => (options.client ?? client).post<RecordFeedbackResponses, RecordFeedbackErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/feedback',
     ...options,
     headers: {
@@ -54,7 +52,6 @@ export const recordFeedback = <ThrowOnError extends boolean = false>(options: Op
  * Run ranked retrieval over canonical documents and passages.
  */
 export const search = <ThrowOnError extends boolean = false>(options: Options<SearchData, ThrowOnError>): RequestResult<SearchResponses, SearchErrors, ThrowOnError> => (options.client ?? client).post<SearchResponses, SearchErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/search',
     ...options,
     headers: {
