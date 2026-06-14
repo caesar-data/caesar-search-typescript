@@ -13,4 +13,4 @@ import type { ClientOptions as ClientOptions2 } from './types.gen';
  */
 export type CreateClientConfig<T extends ClientOptions = ClientOptions2> = (override?: Config<ClientOptions & T>) => Config<Required<ClientOptions> & T>;
 
-export const client: Client = createClient(createConfig<ClientOptions2>({ baseUrl: 'https://search-api-staging-779189860552.europe-west1.run.app' }));
+export const client: Client = createClient(createConfig<ClientOptions2>({ baseUrl: 'https://alpha.api.trycaesar.com' }));

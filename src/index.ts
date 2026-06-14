@@ -14,7 +14,7 @@ export * from "./errors";
 export type * from "./generated/types.gen";
 
 export const VERSION = "0.1.3";
-export const DEFAULT_BASE_URL = "https://search-api-staging-779189860552.europe-west1.run.app";
+export const DEFAULT_BASE_URL = "https://alpha.api.trycaesar.com";
 
 const MAX_DELAY_MS = 8_000;
 const BASE_DELAY_MS = 500;
