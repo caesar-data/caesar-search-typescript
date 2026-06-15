@@ -18,7 +18,7 @@ export function caesarTools(options: CaesarToolsOptions = {}) {
 
   const caesarSearchTool = tool({
     description:
-      "Search the web. Returns ranked results with snippets and provenance handles (doc_id, URLs, crawl dates). Use caesar_read or web_fetch with a result's doc_id or url to read full content.",
+      "Search the web. Returns ranked results with snippets and provenance handles (doc_id, URLs, crawl dates). Use web_fetch with a result's doc_id or url to read full content.",
     inputSchema: jsonSchema<{
       query: string;
       max_results?: number;
@@ -49,7 +49,7 @@ export function caesarTools(options: CaesarToolsOptions = {}) {
 
   const caesarReadTool = tool({
     description:
-      "Read a web page as clean markdown with document metadata and provenance. Accepts a url or a doc_id returned by caesar_search or web_search.",
+      "Read a web page as clean markdown with document metadata and provenance. Accepts a url or a doc_id returned by web_search.",
     inputSchema: jsonSchema<{
       target: string;
       query?: string;
@@ -72,10 +72,20 @@ export function caesarTools(options: CaesarToolsOptions = {}) {
       client.read(target, { query, maxChars: max_chars, startChar: start_char }),
   });
 
-  return {
-    caesar_search: caesarSearchTool,
-    caesar_read: caesarReadTool,
+  const tools = {
     web_search: caesarSearchTool,
     web_fetch: caesarReadTool,
+  };
+
+  Object.defineProperties(tools, {
+    caesar_search: { value: caesarSearchTool, enumerable: false },
+    caesar_read: { value: caesarReadTool, enumerable: false },
+  });
+
+  return tools as typeof tools & {
+    /** @deprecated Use web_search. This legacy alias is non-enumerable. */
+    caesar_search: typeof caesarSearchTool;
+    /** @deprecated Use web_fetch. This legacy alias is non-enumerable. */
+    caesar_read: typeof caesarReadTool;
   };
 }
