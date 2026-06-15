@@ -218,14 +218,19 @@ describe("Caesar client", () => {
 });
 
 describe("AI SDK tools", () => {
-  test("caesarTools exposes caesar_search and caesar_read that call the API", async () => {
+  test("caesarTools exposes branded and generic web tools that call the API", async () => {
     const { caesarTools } = await import("../src/ai");
     const server = mockServer(() => ({ body: SAMPLE_SEARCH }));
     const tools = caesarTools({ client: new Caesar({ apiKey: "k", baseUrl: server.url }) });
-    expect(Object.keys(tools).sort()).toEqual(["caesar_read", "caesar_search"]);
+    expect(Object.keys(tools).sort()).toEqual([
+      "caesar_read",
+      "caesar_search",
+      "web_fetch",
+      "web_search",
+    ]);
 
-    const execute = tools.caesar_search.execute;
-    if (!execute) throw new Error("caesar_search tool has no execute");
+    const execute = tools.web_search.execute;
+    if (!execute) throw new Error("web_search tool has no execute");
     const result = (await execute(
       { query: "tool query", max_results: 2 },
       { toolCallId: "t1", messages: [] },

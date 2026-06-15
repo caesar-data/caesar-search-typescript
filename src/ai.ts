@@ -18,7 +18,7 @@ export function caesarTools(options: CaesarToolsOptions = {}) {
 
   const caesarSearchTool = tool({
     description:
-      "Search the web. Returns ranked results with snippets and provenance handles (doc_id, URLs, crawl dates). Use caesar_read with a result's doc_id or url to read full content.",
+      "Search the web. Returns ranked results with snippets and provenance handles (doc_id, URLs, crawl dates). Use caesar_read or web_fetch with a result's doc_id or url to read full content.",
     inputSchema: jsonSchema<{
       query: string;
       max_results?: number;
@@ -49,7 +49,7 @@ export function caesarTools(options: CaesarToolsOptions = {}) {
 
   const caesarReadTool = tool({
     description:
-      "Read a web page as clean markdown with document metadata and provenance. Accepts a url or a doc_id returned by caesar_search.",
+      "Read a web page as clean markdown with document metadata and provenance. Accepts a url or a doc_id returned by caesar_search or web_search.",
     inputSchema: jsonSchema<{
       target: string;
       query?: string;
@@ -75,5 +75,7 @@ export function caesarTools(options: CaesarToolsOptions = {}) {
   return {
     caesar_search: caesarSearchTool,
     caesar_read: caesarReadTool,
+    web_search: caesarSearchTool,
+    web_fetch: caesarReadTool,
   };
 }
