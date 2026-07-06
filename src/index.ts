@@ -102,7 +102,7 @@ function buildReadBody(target: string | undefined, options: ReadOptions): Record
   if (!docId && !url) throw new TypeError("provide a docId or a url");
 
   const content: Record<string, unknown> = {
-    selection: options.query ? "query_relevant" : "full_document",
+    selection: "full_document",
     format: "markdown",
   };
   if (options.maxChars !== undefined) content.max_chars = options.maxChars;

@@ -27,6 +27,8 @@ export class APIStatusError extends CaesarError {
 
 export class AuthenticationError extends APIStatusError {}
 
+export class InsufficientBalanceError extends APIStatusError {}
+
 export class RateLimitError extends APIStatusError {}
 
 interface ErrorEnvelopeLike {
@@ -44,6 +46,8 @@ export function statusErrorFrom(body: unknown, response: Response): APIStatusErr
     response,
   };
   if (response.status === 401 || response.status === 403) return new AuthenticationError(args);
+  if (response.status === 402 && args.code === "insufficient_balance")
+    return new InsufficientBalanceError(args);
   if (response.status === 429) return new RateLimitError(args);
   return new APIStatusError(args);
 }

@@ -64,7 +64,7 @@ export type DocumentContentRequest = {
      */
     include_offsets?: boolean;
     /**
-     * Maximum content.text characters to return. Longer documents set content.truncated true; continue with content.range.start_char instead of retrying with a larger cap.
+     * Optional maximum content.text characters to return. Omit it for the full selected content. Longer capped reads set content.truncated true; continue with content.range.start_char instead of retrying with a larger cap.
      */
     max_chars?: number;
     /**
@@ -76,7 +76,7 @@ export type DocumentContentRequest = {
      */
     range?: ContentRange;
     /**
-     * How content.text is chosen: query_relevant (default) returns the passages most relevant to query; top_passages returns the document's leading passages; passage_ids returns exactly content.passage_ids; full_document returns the extracted text up to max_chars; none returns no content body.
+     * How content.text is chosen: full_document (default) returns the extracted document text; query_relevant returns the passages most relevant to query; top_passages returns the document's leading passages; passage_ids returns exactly content.passage_ids; none returns no content body.
      */
     selection?: 'none' | 'query_relevant' | 'top_passages' | 'passage_ids' | 'full_document';
 };
@@ -114,7 +114,7 @@ export type DocumentRequest = {
      */
     include?: Array<'metadata' | 'passages' | 'capture_history' | 'content'> | null;
     /**
-     * Query context for passage selection: with content.selection query_relevant, content and passages are chosen for relevance to this text.
+     * Query context for passage selection when content.selection is query_relevant.
      */
     query?: string;
 };
@@ -322,6 +322,10 @@ export type SearchRequest = {
      */
     response?: ResponseShape;
     /**
+     * Which indexes to search. Omit it for the web index. Additive: existing clients are unaffected.
+     */
+    scope?: SearchScope;
+    /**
      * Caller-provided query rewrites. The first entry replaces query as the text sent to the search index; query still drives reranking and passage selection. All entries are visible to the server-side query rewriter.
      */
     search_queries?: Array<string> | null;
@@ -357,6 +361,7 @@ export type SearchResult = {
     canonical_url: string;
     description?: string;
     doc_id: string;
+    index?: string;
     metadata?: SearchResultMetadata;
     passages?: Array<Passage> | null;
     provenance?: DocumentProvenance;
@@ -374,6 +379,17 @@ export type SearchResultMetadata = {
     last_crawled_at?: string;
     last_seen_at?: string;
     published_at?: string;
+};
+
+export type SearchScope = {
+    /**
+     * Indexes to search: web (the shared web corpus) and/or workspace (your organization's ingested documents). Default: ["web"].
+     */
+    indexes?: Array<string> | null;
+    /**
+     * Workspace to search; required when indexes includes workspace.
+     */
+    workspace_id?: string;
 };
 
 export type SearchScore = {
@@ -418,7 +434,7 @@ export type DocumentRequestWritable = {
      */
     include?: Array<'metadata' | 'passages' | 'capture_history' | 'content'> | null;
     /**
-     * Query context for passage selection: with content.selection query_relevant, content and passages are chosen for relevance to this text.
+     * Query context for passage selection when content.selection is query_relevant.
      */
     query?: string;
 };
@@ -533,6 +549,10 @@ export type SearchRequestWritable = {
      */
     response?: ResponseShape;
     /**
+     * Which indexes to search. Omit it for the web index. Additive: existing clients are unaffected.
+     */
+    scope?: SearchScope;
+    /**
      * Caller-provided query rewrites. The first entry replaces query as the text sent to the search index; query still drives reranking and passage selection. All entries are visible to the server-side query rewriter.
      */
     search_queries?: Array<string> | null;
@@ -586,6 +606,10 @@ export type GetDocumentErrors = {
      * Invalid API key, or missing API key when keyless access is disabled.
      */
     401: ErrorEnvelope;
+    /**
+     * Insufficient prepaid balance.
+     */
+    402: ErrorEnvelope;
     /**
      * API key does not have the required scope.
      */
@@ -704,6 +728,10 @@ export type SearchErrors = {
      * Invalid API key, or missing API key when keyless access is disabled.
      */
     401: ErrorEnvelope;
+    /**
+     * Insufficient prepaid balance.
+     */
+    402: ErrorEnvelope;
     /**
      * API key does not have the required scope.
      */

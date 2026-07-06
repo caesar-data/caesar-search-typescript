@@ -1,5 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import { APIStatusError, APITimeoutError, AuthenticationError, Caesar, RateLimitError } from "../src/index";
+import {
+  APIStatusError,
+  APITimeoutError,
+  AuthenticationError,
+  Caesar,
+  InsufficientBalanceError,
+  RateLimitError,
+} from "../src/index";
 
 interface MockCall {
   path: string;
@@ -104,7 +111,7 @@ describe("Caesar client", () => {
 
     const byUrl = server.calls[1]?.body ?? {};
     expect(byUrl.canonical_url).toBe("https://example.com/page");
-    expect((byUrl.content as Record<string, unknown>).selection).toBe("query_relevant");
+    expect((byUrl.content as Record<string, unknown>).selection).toBe("full_document");
 
     const byRange = server.calls[2]?.body ?? {};
     expect((byRange.content as Record<string, unknown>).range).toEqual({ start_char: 100 });
@@ -165,6 +172,30 @@ describe("Caesar client", () => {
     }));
     const client = new Caesar({ baseUrl: server.url, maxRetries: 0 });
     await expect(client.search("q")).rejects.toBeInstanceOf(AuthenticationError);
+    server.stop();
+  });
+
+  test("402 insufficient_balance maps to InsufficientBalanceError", async () => {
+    const server = mockServer(() => ({
+      status: 402,
+      body: {
+        request_id: "req-billing",
+        error: {
+          code: "insufficient_balance",
+          message: "top up",
+          details: { balance_cents: -37 },
+        },
+      },
+    }));
+    const client = new Caesar({ apiKey: "k", baseUrl: server.url, maxRetries: 0 });
+    try {
+      await client.search("q");
+      throw new Error("expected InsufficientBalanceError");
+    } catch (error) {
+      expect(error).toBeInstanceOf(InsufficientBalanceError);
+      expect((error as InsufficientBalanceError).code).toBe("insufficient_balance");
+      expect((error as InsufficientBalanceError).requestId).toBe("req-billing");
+    }
     server.stop();
   });
 

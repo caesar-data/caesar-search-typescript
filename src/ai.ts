@@ -59,8 +59,11 @@ export function caesarTools(options: CaesarToolsOptions = {}) {
       type: "object",
       properties: {
         target: { type: "string", description: "URL or doc_id to read." },
-        query: { type: "string", description: "Optional question to focus content selection." },
-        max_chars: { type: "number", description: "Content character cap. Default 12000." },
+        query: { type: "string", description: "Optional query context for the read." },
+        max_chars: {
+          type: "number",
+          description: "Optional content character cap. Omit for the full document.",
+        },
         start_char: {
           type: "number",
           description: "Resume a truncated read from this character offset.",
