@@ -13,7 +13,7 @@ import type {
 export * from "./errors";
 export type * from "./generated/types.gen";
 
-export const VERSION = "0.1.3";
+export const VERSION = "0.1.4";
 export const DEFAULT_BASE_URL = "https://alpha.api.trycaesar.com";
 
 const MAX_DELAY_MS = 8_000;

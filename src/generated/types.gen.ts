@@ -584,10 +584,6 @@ export type GetDocumentData = {
     body: DocumentRequestWritable;
     headers?: {
         /**
-         * Optional bearer token for keyed access. Omit this header for anonymous access.
-         */
-        Authorization?: string;
-        /**
          * Optional client session identifier.
          */
         'X-Session-ID'?: string;
@@ -603,7 +599,7 @@ export type GetDocumentErrors = {
      */
     400: ErrorEnvelope;
     /**
-     * Invalid API key, or missing API key when keyless access is disabled.
+     * Missing or invalid API key.
      */
     401: ErrorEnvelope;
     /**
@@ -651,10 +647,6 @@ export type RecordFeedbackData = {
     body: FeedbackRequestWritable;
     headers?: {
         /**
-         * Optional bearer token for keyed access. Omit this header for anonymous access.
-         */
-        Authorization?: string;
-        /**
          * Optional client session identifier.
          */
         'X-Session-ID'?: string;
@@ -670,7 +662,7 @@ export type RecordFeedbackErrors = {
      */
     400: ErrorEnvelope;
     /**
-     * Invalid API key, or missing API key when keyless access is disabled.
+     * Missing or invalid API key.
      */
     401: ErrorEnvelope;
     /**
@@ -706,10 +698,6 @@ export type SearchData = {
     body: SearchRequestWritable;
     headers?: {
         /**
-         * Optional bearer token for keyed access. Omit this header for anonymous access.
-         */
-        Authorization?: string;
-        /**
          * Optional client session identifier.
          */
         'X-Session-ID'?: string;
@@ -725,7 +713,7 @@ export type SearchErrors = {
      */
     400: ErrorEnvelope;
     /**
-     * Invalid API key, or missing API key when keyless access is disabled.
+     * Missing or invalid API key.
      */
     401: ErrorEnvelope;
     /**
