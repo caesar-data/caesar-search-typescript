@@ -29,6 +29,17 @@ export class AuthenticationError extends APIStatusError {}
 
 export class InsufficientBalanceError extends APIStatusError {}
 
+export class MissingAPIKeyError extends AuthenticationError {
+  constructor() {
+    super({
+      statusCode: 401,
+      code: "missing_api_key",
+      message: "missing or invalid API key — set CAESAR_API_KEY",
+      response: new Response(null, { status: 401 }),
+    });
+  }
+}
+
 export class RateLimitError extends APIStatusError {}
 
 interface ErrorEnvelopeLike {

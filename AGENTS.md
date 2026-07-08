@@ -7,7 +7,7 @@ Guidance for AI agents using and maintaining `caesar-search` (TypeScript).
 - The loop: `search()` → pick `doc_id` → `read()` → optionally `feedback()`. Thread provenance handles (`doc_id`, `search_id`) between calls.
 - `read()` accepts a doc_id or URL positionally. A truncated read sets `content.truncated`; continue with `startChar: content.start_char + content.char_count` — do not retry with a bigger `maxChars`.
 - `search(query, { verbosity })` controls payload shape: `ids_only` (handles only), `compact`, `standard` (default), `full` (adds provenance). `maxCharsTotal` sets a hard response budget.
-- Set `CAESAR_API_KEY`; never hardcode keys. Catch `AuthenticationError`/`RateLimitError`/`APIStatusError`.
+- Set `CAESAR_API_KEY`; never hardcode keys. Catch `MissingAPIKeyError`/`AuthenticationError`/`RateLimitError`/`APIStatusError`.
 - For Vercel AI SDK agents, import `caesarTools()` from `caesar-search/ai`.
 
 ## Common mistakes

@@ -5,6 +5,7 @@ import {
   AuthenticationError,
   Caesar,
   InsufficientBalanceError,
+  MissingAPIKeyError,
   RateLimitError,
 } from "../src/index";
 
@@ -95,6 +96,33 @@ describe("Caesar client", () => {
     server.stop();
     expect(server.calls[0]?.headers.authorization).toBe("Bearer sdk-test-key");
     expect(server.calls[0]?.headers["x-caesar-client"]).toStartWith("ts-sdk/");
+  });
+
+  test("public base URL without key throws MissingAPIKeyError", () => {
+    const previousKey = process.env.CAESAR_API_KEY;
+    const previousBaseUrl = process.env.CAESAR_BASE_URL;
+    delete process.env.CAESAR_API_KEY;
+    delete process.env.CAESAR_BASE_URL;
+    try {
+      expect(() => new Caesar()).toThrow(MissingAPIKeyError);
+    } finally {
+      if (previousKey !== undefined) process.env.CAESAR_API_KEY = previousKey;
+      if (previousBaseUrl !== undefined) process.env.CAESAR_BASE_URL = previousBaseUrl;
+    }
+  });
+
+  test("custom base URL without key skips local preflight", async () => {
+    const server = mockServer(() => ({ body: SAMPLE_SEARCH }));
+    const previousKey = process.env.CAESAR_API_KEY;
+    delete process.env.CAESAR_API_KEY;
+    try {
+      const client = new Caesar({ baseUrl: server.url });
+      await client.search("q");
+    } finally {
+      if (previousKey !== undefined) process.env.CAESAR_API_KEY = previousKey;
+      server.stop();
+    }
+    expect(server.calls[0]?.headers.authorization).toBeUndefined();
   });
 
   test("read maps doc_id, url, and start_char range", async () => {

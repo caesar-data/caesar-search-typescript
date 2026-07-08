@@ -13,7 +13,7 @@ Works in Node 20+, Bun, Deno, and edge runtimes (standard `fetch`). ESM and CJS,
 ```ts
 import { Caesar } from "caesar-search";
 
-const caesar = new Caesar(); // reads CAESAR_API_KEY; anonymous works at a lower rate limit
+const caesar = new Caesar(); // requires CAESAR_API_KEY (get one at app.trycaesar.com)
 
 const results = await caesar.search("postgres 17 logical replication failover", {
   maxResults: 5,
@@ -76,7 +76,7 @@ const { text } = await generateText({
 
 | Option | Environment variable | Default |
 |---|---|---|
-| `apiKey` | `CAESAR_API_KEY` | anonymous (lower rate limit) |
+| `apiKey` | `CAESAR_API_KEY` | required; throws `MissingAPIKeyError` on the public endpoint |
 | `baseUrl` | `CAESAR_BASE_URL` | the public endpoint |
 | `maxRetries` | — | 3 (429/5xx, honors `Retry-After`) |
 | `timeoutMs` | — | 30000 |
@@ -84,7 +84,7 @@ const { text } = await generateText({
 ## Errors
 
 ```ts
-import { AuthenticationError, RateLimitError, APIStatusError } from "caesar-search";
+import { AuthenticationError, MissingAPIKeyError, RateLimitError, APIStatusError } from "caesar-search";
 ```
 
 All API errors carry `statusCode`, `code`, `requestId`, and the raw `response`. Connection failures throw `APIConnectionError`; timeouts throw `APITimeoutError`.

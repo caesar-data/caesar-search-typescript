@@ -1,4 +1,10 @@
-import { APIConnectionError, APITimeoutError, CaesarError, statusErrorFrom } from "./errors";
+import {
+  APIConnectionError,
+  APITimeoutError,
+  CaesarError,
+  MissingAPIKeyError,
+  statusErrorFrom,
+} from "./errors";
 import type { Client } from "./generated/client";
 import { createClient, createConfig } from "./generated/client";
 import { getDocument, recordFeedback, search as searchOp } from "./generated/sdk.gen";
@@ -13,7 +19,7 @@ import type {
 export * from "./errors";
 export type * from "./generated/types.gen";
 
-export const VERSION = "0.1.4";
+export const VERSION = "0.2.0";
 export const DEFAULT_BASE_URL = "https://alpha.api.trycaesar.com";
 
 const MAX_DELAY_MS = 8_000;
@@ -22,7 +28,7 @@ const RETRYABLE = new Set([429, 500, 502, 503, 504]);
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export interface CaesarOptions {
-  /** API key; falls back to CAESAR_API_KEY. Anonymous works at a lower rate limit. */
+  /** API key; falls back to CAESAR_API_KEY. Required for the public Caesar API. */
   apiKey?: string;
   /** Base URL; falls back to CAESAR_BASE_URL, then the public default. */
   baseUrl?: string;
@@ -67,6 +73,16 @@ export interface FeedbackOptions {
 function env(name: string): string | undefined {
   // Works in Node, Bun, and edge runtimes that polyfill process.env.
   return typeof process !== "undefined" ? process.env?.[name] : undefined;
+}
+
+function resolveApiKey(apiKey: string | undefined): string | undefined {
+  if (apiKey && apiKey.length > 0) return apiKey;
+  const envKey = env("CAESAR_API_KEY");
+  return envKey && envKey.length > 0 ? envKey : undefined;
+}
+
+function isPublicBaseUrl(baseUrl: string): boolean {
+  return baseUrl.replace(/\/+$/, "") === DEFAULT_BASE_URL;
 }
 
 function retryDelayMs(attempt: number, retryAfter: string | null): number {
@@ -160,8 +176,9 @@ export class Caesar {
   #timeoutMs: number;
 
   constructor(options: CaesarOptions = {}) {
-    const apiKey = options.apiKey ?? env("CAESAR_API_KEY");
+    const apiKey = resolveApiKey(options.apiKey);
     this.baseUrl = (options.baseUrl ?? env("CAESAR_BASE_URL") ?? DEFAULT_BASE_URL).replace(/\/+$/, "");
+    if (!apiKey && isPublicBaseUrl(this.baseUrl)) throw new MissingAPIKeyError();
     this.#maxRetries = options.maxRetries ?? 3;
     this.#timeoutMs = options.timeoutMs ?? 30_000;
 
