@@ -362,12 +362,15 @@ export type SearchResult = {
     description?: string;
     doc_id: string;
     index?: string;
+    labels?: Array<string> | null;
     metadata?: SearchResultMetadata;
+    mime?: string;
     passages?: Array<Passage> | null;
     provenance?: DocumentProvenance;
     rank: number;
     score?: SearchScore;
     snippet?: string;
+    source_uri?: string;
     source_url?: string;
     title?: string;
 };
