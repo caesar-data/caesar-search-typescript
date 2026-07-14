@@ -39,7 +39,7 @@ export interface CaesarOptions {
 }
 
 export interface SearchOptions {
-  mode?: "fast" | "standard" | "research";
+  mode?: "standard" | "research";
   maxResults?: number;
   sessionId?: string;
   /** Response shaping preset: ids_only | compact | standard | full. */

@@ -310,9 +310,9 @@ export type SearchRequest = {
      */
     max_results?: number;
     /**
-     * Retrieval budget and ranking mode: fast skips the reranking stage for the lowest latency; standard (default) and research rerank results, with research spending the largest retrieval budget.
+     * Retrieval budget and ranking mode: standard (default) and research both rerank results, with research spending the largest retrieval budget.
      */
-    mode?: 'fast' | 'standard' | 'research';
+    mode?: 'standard' | 'research';
     /**
      * The search query, phrased as the user or agent would ask it. Drives ranking and passage selection even when search_queries supplies a rewrite.
      */
@@ -537,9 +537,9 @@ export type SearchRequestWritable = {
      */
     max_results?: number;
     /**
-     * Retrieval budget and ranking mode: fast skips the reranking stage for the lowest latency; standard (default) and research rerank results, with research spending the largest retrieval budget.
+     * Retrieval budget and ranking mode: standard (default) and research both rerank results, with research spending the largest retrieval budget.
      */
-    mode?: 'fast' | 'standard' | 'research';
+    mode?: 'standard' | 'research';
     /**
      * The search query, phrased as the user or agent would ask it. Drives ranking and passage selection even when search_queries supplies a rewrite.
      */
