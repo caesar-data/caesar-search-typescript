@@ -68,7 +68,7 @@ describe("Caesar client", () => {
     const server = mockServer(() => ({ body: SAMPLE_SEARCH }));
     const client = new Caesar({ apiKey: "test-key", baseUrl: server.url });
     const data = await client.search("test query", {
-      mode: "fast",
+      mode: "research",
       maxResults: 7,
       verbosity: "compact",
       maxCharsTotal: 4000,
@@ -82,7 +82,7 @@ describe("Caesar client", () => {
 
     const body = server.calls[0]?.body ?? {};
     expect(body.query).toBe("test query");
-    expect(body.mode).toBe("fast");
+    expect(body.mode).toBe("research");
     expect(body.max_results).toBe(7);
     expect(body.response).toEqual({ verbosity: "compact", budget: { max_chars_total: 4000 } });
     expect(body.client_model).toBe("ts-sdk");
