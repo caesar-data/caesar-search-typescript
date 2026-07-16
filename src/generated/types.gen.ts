@@ -397,7 +397,6 @@ export type SearchScore = {
 };
 
 export type Usage = {
-    approx_tokens: number;
     bytes_returned: number;
     requests: number;
 };
