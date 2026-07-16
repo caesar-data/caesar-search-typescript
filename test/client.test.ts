@@ -61,7 +61,7 @@ const SAMPLE_SEARCH = {
       metadata: { published_at: "2026-06-01T00:00:00Z", last_crawled_at: "2026-06-12T00:00:00Z" },
     },
   ],
-  usage: { requests: 1, bytes_returned: 1000, approx_tokens: 250 },
+  usage: { requests: 1, bytes_returned: 1000 },
 };
 
 describe("Caesar client", () => {
