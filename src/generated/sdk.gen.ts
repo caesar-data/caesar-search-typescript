@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { GetDocumentData, GetDocumentErrors, GetDocumentResponses, RecordFeedbackData, RecordFeedbackErrors, RecordFeedbackResponses, SearchData, SearchErrors, SearchResponses } from './types.gen';
+import type { GetDocumentData, GetDocumentErrors, GetDocumentResponses, GetResearchData, GetResearchErrors, GetResearchResponses, GetSearchIntegrationResultsData, GetSearchIntegrationResultsErrors, GetSearchIntegrationResultsResponses, ListResearchData, ListResearchErrors, ListResearchResponses, RecordFeedbackData, RecordFeedbackErrors, RecordFeedbackResponses, SearchData, SearchErrors, SearchResponses, StartResearchData, StartResearchErrors, StartResearchResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -49,6 +49,43 @@ export const recordFeedback = <ThrowOnError extends boolean = false>(options: Op
 });
 
 /**
+ * List the caller's research runs
+ *
+ * Return the caller's research jobs, most recent first. Lightweight: result bodies are omitted (fetch a job by id for its result).
+ */
+export const listResearch = <ThrowOnError extends boolean = false>(options?: Options<ListResearchData, ThrowOnError>): RequestResult<ListResearchResponses, ListResearchErrors, ThrowOnError> => (options?.client ?? client).get<ListResearchResponses, ListResearchErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/research',
+    ...options
+});
+
+/**
+ * Start a research run
+ *
+ * Kick off an asynchronous deep-research run and return a job id to poll.
+ */
+export const startResearch = <ThrowOnError extends boolean = false>(options: Options<StartResearchData, ThrowOnError>): RequestResult<StartResearchResponses, StartResearchErrors, ThrowOnError> => (options.client ?? client).post<StartResearchResponses, StartResearchErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/research',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get a research run's status and result
+ *
+ * Poll a research job; returns its status, plus the result when completed or the error when failed.
+ */
+export const getResearch = <ThrowOnError extends boolean = false>(options: Options<GetResearchData, ThrowOnError>): RequestResult<GetResearchResponses, GetResearchErrors, ThrowOnError> => (options.client ?? client).get<GetResearchResponses, GetResearchErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/research/{id}',
+    ...options
+});
+
+/**
  * Search
  *
  * Run ranked retrieval over canonical documents and passages.
@@ -61,4 +98,15 @@ export const search = <ThrowOnError extends boolean = false>(options: Options<Se
         'Content-Type': 'application/json',
         ...options.headers
     }
+});
+
+/**
+ * Get stored integration results
+ *
+ * Retrieve integration records already acquired during a search without invoking providers again.
+ */
+export const getSearchIntegrationResults = <ThrowOnError extends boolean = false>(options: Options<GetSearchIntegrationResultsData, ThrowOnError>): RequestResult<GetSearchIntegrationResultsResponses, GetSearchIntegrationResultsErrors, ThrowOnError> => (options.client ?? client).get<GetSearchIntegrationResultsResponses, GetSearchIntegrationResultsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/search/{search_id}/integration-results',
+    ...options
 });
