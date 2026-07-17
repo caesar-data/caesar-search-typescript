@@ -16,6 +16,12 @@ export type CaptureHistoryEntry = {
     content_format?: string;
 };
 
+export type Citation = {
+    index: number;
+    title: string;
+    url: string;
+};
+
 export type ContentRange = {
     /**
      * Optional capture pin; a stale_range warning is returned when the latest capture differs.
@@ -239,6 +245,48 @@ export type FeedbackResponse = {
     usage?: Usage;
 };
 
+export type IntegrationResultsResponse = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    access?: Access;
+    next_cursor?: string;
+    request_id: string;
+    results: Array<IntegrationSearchResult> | null;
+    search_id: string;
+    total: number;
+    usage?: Usage;
+};
+
+export type IntegrationResultsSummary = {
+    href: string;
+    selected: number;
+    total: number;
+};
+
+export type IntegrationSearchResult = {
+    canonical_url: string;
+    description?: string;
+    doc_id: string;
+    index?: string;
+    integration: string;
+    labels?: Array<string> | null;
+    metadata?: SearchResultMetadata;
+    mime?: string;
+    operation: string;
+    passages?: Array<Passage> | null;
+    primary_rank?: number;
+    provenance?: DocumentProvenance;
+    rank: number;
+    score?: SearchScore;
+    selected: boolean;
+    snippet?: string;
+    source_uri?: string;
+    source_url?: string;
+    title?: string;
+};
+
 export type Passage = {
     char_end?: number;
     char_start?: number;
@@ -262,6 +310,92 @@ export type RateLimit = {
     reset_at: string;
 };
 
+export type ResearchJobResponse = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    access?: Access;
+    completed_at?: string;
+    created_at: string;
+    /**
+     * Present when status is failed.
+     */
+    error?: string;
+    id: string;
+    request_id: string;
+    /**
+     * Present when status is completed.
+     */
+    result?: Result;
+    /**
+     * queued, running, completed, or failed.
+     */
+    status: string;
+};
+
+export type ResearchJobSummary = {
+    completed_at?: string;
+    created_at: string;
+    id: string;
+    query: string;
+    /**
+     * queued, running, completed, or failed.
+     */
+    status: string;
+};
+
+export type ResearchListResponse = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    access?: Access;
+    jobs: Array<ResearchJobSummary> | null;
+    request_id: string;
+};
+
+export type ResearchRequest = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * Domains to drop from results.
+     */
+    excluded_domains?: Array<string> | null;
+    /**
+     * Max tool calls (web_search/web_read/scratchpad) before a final answer is forced. Optional; defaults internally. The agent usually stops earlier on its own.
+     */
+    max_tool_calls?: number;
+    /**
+     * Override the default research model.
+     */
+    model?: string;
+    /**
+     * Research question to investigate.
+     */
+    query: string;
+    /**
+     * Per-source fetch timeout in seconds.
+     */
+    source_timeout?: number;
+};
+
+export type ResearchStartResponse = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    access?: Access;
+    /**
+     * Job id to poll at GET /v1/research/{id}.
+     */
+    id: string;
+    request_id: string;
+    status: string;
+};
+
 export type ResponseBudget = {
     /**
      * Maximum serialized response size in characters (roughly 4 characters per token, so 2000 is about 500 tokens).
@@ -282,6 +416,23 @@ export type ResponseShape = {
      * Field preset: ids_only (rank, doc_id, url, title), compact (adds snippet, score, key dates), standard (today's default), full (adds provenance).
      */
     verbosity?: 'ids_only' | 'compact' | 'standard' | 'full';
+};
+
+export type Result = {
+    citations: Array<Citation> | null;
+    confidence: string;
+    content: string;
+    cost_is_lower_bound: boolean;
+    cost_usd: number;
+    failure_tool?: string;
+    failure_turn?: number;
+    llm_calls: number;
+    model: string;
+    query: string;
+    read_count: number;
+    run_id?: string;
+    tool_calls_used: number;
+    tool_invocations?: Array<ToolInvocation> | null;
 };
 
 export type SearchRequest = {
@@ -347,6 +498,7 @@ export type SearchResponse = {
      */
     readonly $schema?: string;
     access?: Access;
+    integration_results?: IntegrationResultsSummary;
     ranking?: Ranking;
     request_id: string;
     results: Array<SearchResult> | null;
@@ -362,12 +514,15 @@ export type SearchResult = {
     description?: string;
     doc_id: string;
     index?: string;
+    labels?: Array<string> | null;
     metadata?: SearchResultMetadata;
+    mime?: string;
     passages?: Array<Passage> | null;
     provenance?: DocumentProvenance;
     rank: number;
     score?: SearchScore;
     snippet?: string;
+    source_uri?: string;
     source_url?: string;
     title?: string;
 };
@@ -394,6 +549,18 @@ export type SearchScope = {
 
 export type SearchScore = {
     value: number;
+};
+
+export type ToolInvocation = {
+    error?: string;
+    latency_ms: number;
+    ordinal: number;
+    query?: string;
+    result_count: number;
+    status: string;
+    tool: string;
+    turn: number;
+    url?: string;
 };
 
 export type Usage = {
@@ -514,6 +681,75 @@ export type FeedbackResponseWritable = {
     usage?: Usage;
 };
 
+export type IntegrationResultsResponseWritable = {
+    access?: Access;
+    next_cursor?: string;
+    request_id: string;
+    results: Array<IntegrationSearchResult> | null;
+    search_id: string;
+    total: number;
+    usage?: Usage;
+};
+
+export type ResearchJobResponseWritable = {
+    access?: Access;
+    completed_at?: string;
+    created_at: string;
+    /**
+     * Present when status is failed.
+     */
+    error?: string;
+    id: string;
+    request_id: string;
+    /**
+     * Present when status is completed.
+     */
+    result?: Result;
+    /**
+     * queued, running, completed, or failed.
+     */
+    status: string;
+};
+
+export type ResearchListResponseWritable = {
+    access?: Access;
+    jobs: Array<ResearchJobSummary> | null;
+    request_id: string;
+};
+
+export type ResearchRequestWritable = {
+    /**
+     * Domains to drop from results.
+     */
+    excluded_domains?: Array<string> | null;
+    /**
+     * Max tool calls (web_search/web_read/scratchpad) before a final answer is forced. Optional; defaults internally. The agent usually stops earlier on its own.
+     */
+    max_tool_calls?: number;
+    /**
+     * Override the default research model.
+     */
+    model?: string;
+    /**
+     * Research question to investigate.
+     */
+    query: string;
+    /**
+     * Per-source fetch timeout in seconds.
+     */
+    source_timeout?: number;
+};
+
+export type ResearchStartResponseWritable = {
+    access?: Access;
+    /**
+     * Job id to poll at GET /v1/research/{id}.
+     */
+    id: string;
+    request_id: string;
+    status: string;
+};
+
 export type SearchRequestWritable = {
     /**
      * Calling model identifier, recorded for analytics and ranking tuning.
@@ -569,6 +805,7 @@ export type SearchRequestWritable = {
 
 export type SearchResponseWritable = {
     access?: Access;
+    integration_results?: IntegrationResultsSummary;
     ranking?: Ranking;
     request_id: string;
     results: Array<SearchResult> | null;
@@ -693,6 +930,129 @@ export type RecordFeedbackResponses = {
 
 export type RecordFeedbackResponse = RecordFeedbackResponses[keyof RecordFeedbackResponses];
 
+export type ListResearchData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Max jobs to return (default 50, max 200).
+         */
+        limit?: number;
+    };
+    url: '/v1/research';
+};
+
+export type ListResearchErrors = {
+    /**
+     * Invalid API key, or missing API key when keyless access is disabled.
+     */
+    401: ErrorEnvelope;
+    /**
+     * Rate limited.
+     */
+    429: ErrorEnvelope;
+};
+
+export type ListResearchError = ListResearchErrors[keyof ListResearchErrors];
+
+export type ListResearchResponses = {
+    /**
+     * Research jobs.
+     */
+    200: ResearchListResponse;
+};
+
+export type ListResearchResponse = ListResearchResponses[keyof ListResearchResponses];
+
+export type StartResearchData = {
+    body: ResearchRequestWritable;
+    headers?: {
+        /**
+         * Optional client session identifier.
+         */
+        'X-Session-ID'?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/v1/research';
+};
+
+export type StartResearchErrors = {
+    /**
+     * Validation error.
+     */
+    400: ErrorEnvelope;
+    /**
+     * Invalid API key, or missing API key when keyless access is disabled.
+     */
+    401: ErrorEnvelope;
+    /**
+     * Insufficient prepaid balance.
+     */
+    402: ErrorEnvelope;
+    /**
+     * API key does not have the required scope.
+     */
+    403: ErrorEnvelope;
+    /**
+     * Rate limited, or too many concurrent research jobs.
+     */
+    429: ErrorEnvelope;
+    /**
+     * Internal error.
+     */
+    500: ErrorEnvelope;
+};
+
+export type StartResearchError = StartResearchErrors[keyof StartResearchErrors];
+
+export type StartResearchResponses = {
+    /**
+     * Research run accepted.
+     */
+    202: ResearchStartResponse;
+};
+
+export type StartResearchResponse = StartResearchResponses[keyof StartResearchResponses];
+
+export type GetResearchData = {
+    body?: never;
+    path: {
+        /**
+         * Research job id.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/v1/research/{id}';
+};
+
+export type GetResearchErrors = {
+    /**
+     * Invalid API key, or missing API key when keyless access is disabled.
+     */
+    401: ErrorEnvelope;
+    /**
+     * Research job not found.
+     */
+    404: ErrorEnvelope;
+    /**
+     * Rate limited.
+     */
+    429: ErrorEnvelope;
+};
+
+export type GetResearchError = GetResearchErrors[keyof GetResearchErrors];
+
+export type GetResearchResponses = {
+    /**
+     * Research job status.
+     */
+    200: ResearchJobResponse;
+};
+
+export type GetResearchResponse = GetResearchResponses[keyof GetResearchResponses];
+
 export type SearchData = {
     body: SearchRequestWritable;
     headers?: {
@@ -751,3 +1111,62 @@ export type SearchResponses = {
 };
 
 export type SearchResponse2 = SearchResponses[keyof SearchResponses];
+
+export type GetSearchIntegrationResultsData = {
+    body?: never;
+    path: {
+        /**
+         * Search identifier returned by POST /v1/search.
+         */
+        search_id: string;
+    };
+    query?: {
+        /**
+         * Maximum results in this page.
+         */
+        limit?: number;
+        /**
+         * Opaque cursor returned by the previous page.
+         */
+        cursor?: string;
+    };
+    url: '/v1/search/{search_id}/integration-results';
+};
+
+export type GetSearchIntegrationResultsErrors = {
+    /**
+     * Invalid limit or cursor.
+     */
+    400: ErrorEnvelope;
+    /**
+     * Missing or invalid API key.
+     */
+    401: ErrorEnvelope;
+    /**
+     * API key does not have the required scope.
+     */
+    403: ErrorEnvelope;
+    /**
+     * Search not found.
+     */
+    404: ErrorEnvelope;
+    /**
+     * Rate limited.
+     */
+    429: ErrorEnvelope;
+    /**
+     * Stored integration results are unavailable.
+     */
+    503: ErrorEnvelope;
+};
+
+export type GetSearchIntegrationResultsError = GetSearchIntegrationResultsErrors[keyof GetSearchIntegrationResultsErrors];
+
+export type GetSearchIntegrationResultsResponses = {
+    /**
+     * Stored integration results.
+     */
+    200: IntegrationResultsResponse;
+};
+
+export type GetSearchIntegrationResultsResponse = GetSearchIntegrationResultsResponses[keyof GetSearchIntegrationResultsResponses];
