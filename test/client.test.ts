@@ -48,7 +48,7 @@ const SAMPLE_SEARCH = {
   access: {
     rate_limit: { limit_rps: 100, remaining: 99, reset_at: "2026-06-12T00:00:00Z" },
   },
-  ranking: { mode: "standard", ranker_version: "reranked_v1", score_scope: "response_local" },
+  ranking: { ranker_version: "reranked_v1", score_scope: "response_local" },
   results: [
     {
       rank: 1,
@@ -68,7 +68,6 @@ describe("Caesar client", () => {
     const server = mockServer(() => ({ body: SAMPLE_SEARCH }));
     const client = new Caesar({ apiKey: "test-key", baseUrl: server.url });
     const data = await client.search("test query", {
-      mode: "research",
       maxResults: 7,
       verbosity: "compact",
       maxCharsTotal: 4000,
@@ -82,7 +81,7 @@ describe("Caesar client", () => {
 
     const body = server.calls[0]?.body ?? {};
     expect(body.query).toBe("test query");
-    expect(body.mode).toBe("research");
+    expect(body).not.toHaveProperty("mode");
     expect(body.max_results).toBe(7);
     expect(body.response).toEqual({ verbosity: "compact", budget: { max_chars_total: 4000 } });
     expect(body.client_model).toBe("ts-sdk");
