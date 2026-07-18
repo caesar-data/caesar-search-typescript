@@ -2,8 +2,9 @@ name: spec-sync
 
 # Polls the live public OpenAPI spec, regenerates the client when it changes,
 # classifies the change with oasdiff, and auto-releases non-breaking updates.
-# Breaking changes open a PR that waits for review. No monorepo credentials
-# required: the spec travels over the public spec URL.
+# Breaking changes update a stable review branch. Repository Actions are not
+# permitted to create pull requests by organization policy, so the workflow
+# links to the branch instead of failing after every scheduled run.
 
 on:
   schedule:
@@ -15,7 +16,6 @@ env:
 
 permissions:
   contents: write
-  pull-requests: write
   actions: write
 
 jobs:
@@ -87,20 +87,27 @@ jobs:
           # Tags pushed with GITHUB_TOKEN do not trigger workflows; dispatch
           # the release workflow explicitly (workflow_dispatch is exempt).
           gh workflow run release.yml --ref "v${VERSION}"
-      - name: Open review PR (breaking)
+      - name: Publish review branch (breaking)
         if: steps.drift.outputs.changed == 'true' && steps.classify.outputs.breaking == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SUMMARY: ${{ steps.classify.outputs.summary }}
         run: |
           git config user.name "caesar-spec-sync"
           git config user.email "releases@caesar.xyz"
-          BRANCH="spec-sync/breaking-$(date -u +%Y%m%d%H%M)"
-          git checkout -b "$BRANCH"
+          BRANCH="spec-sync/breaking"
+          git fetch origin "$BRANCH" || true
+          git checkout -B "$BRANCH"
           git add -A
           git commit -m "feat!: regenerate from updated public spec (breaking)"
-          git push origin "$BRANCH"
-          gh pr create --title "Breaking spec change: review required" \
-            --body "$(printf 'oasdiff classified this spec update as breaking.\n\n```\n%s\n```\n\nMerge and tag a minor release after review.' "$SUMMARY")" \
-            --label breaking || gh pr create --title "Breaking spec change: review required" \
-            --body "oasdiff classified this spec update as breaking. Merge and tag a minor release after review."
+          git push --force-with-lease origin "$BRANCH"
+          REVIEW_URL="https://github.com/${GITHUB_REPOSITORY}/compare/main...${BRANCH}?expand=1"
+          {
+            echo "### Breaking OpenAPI change"
+            echo
+            echo "Review and open a pull request from [${BRANCH}](${REVIEW_URL})."
+            echo
+            echo '```'
+            printf '%s\n' "$SUMMARY"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice title=Breaking spec review required::Review ${REVIEW_URL}"
