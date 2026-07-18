@@ -46,7 +46,6 @@ const SAMPLE_SEARCH = {
   search_id: "22222222-2222-4222-8222-222222222222",
   session_id: "33333333-3333-4333-8333-333333333333",
   access: {
-    tier: "api_key",
     rate_limit: { limit_rps: 100, remaining: 99, reset_at: "2026-06-12T00:00:00Z" },
   },
   ranking: { mode: "standard", ranker_version: "reranked_v1", score_scope: "response_local" },
