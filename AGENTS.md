@@ -24,7 +24,7 @@ Guidance for AI agents using and maintaining `caesar-search` (TypeScript).
 
 - Bun-first: `bun install`, `bun test`, `bun run build` (tsup, ESM+CJS+dts), `bun run lint` (Biome), `bun run typecheck`.
 - `spec/openapi-public.json` is the vendored contract; `bun run generate` (@hey-api/openapi-ts) regenerates `src/generated/`. CI fails if the generated code is dirty against the spec.
-- The spec-sync workflow polls the live public spec, regenerates, classifies the diff with oasdiff, and auto-releases non-breaking changes; breaking changes open a PR for review.
+- The spec-sync workflow polls the live public spec, regenerates, classifies the diff with oasdiff, and updates stable review branches. Merging a non-breaking version bump into `main` publishes the release automatically.
 - `src/generated/` is excluded from Biome; never edit it by hand.
 - Releases bump both `package.json` and the `VERSION` constant in `src/index.ts`.
 - Tests are hermetic (`Bun.serve` mock server); no network access required.
