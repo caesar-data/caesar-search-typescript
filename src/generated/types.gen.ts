@@ -250,7 +250,6 @@ export type Passage = {
 };
 
 export type Ranking = {
-    mode: string;
     ranker_version: string;
     score_scope: string;
 };
@@ -308,10 +307,6 @@ export type SearchRequest = {
      * Maximum number of ranked results to return. The response carries fewer when the index has fewer matches.
      */
     max_results?: number;
-    /**
-     * Retrieval budget and ranking mode: standard (default) and research both rerank results, with research spending the largest retrieval budget.
-     */
-    mode?: 'standard' | 'research';
     /**
      * The search query, phrased as the user or agent would ask it. Drives ranking and passage selection even when search_queries supplies a rewrite.
      */
@@ -534,10 +529,6 @@ export type SearchRequestWritable = {
      * Maximum number of ranked results to return. The response carries fewer when the index has fewer matches.
      */
     max_results?: number;
-    /**
-     * Retrieval budget and ranking mode: standard (default) and research both rerank results, with research spending the largest retrieval budget.
-     */
-    mode?: 'standard' | 'research';
     /**
      * The search query, phrased as the user or agent would ask it. Drives ranking and passage selection even when search_queries supplies a rewrite.
      */
