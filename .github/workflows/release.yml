@@ -2,7 +2,11 @@ name: release
 
 on:
   push:
+    branches: ["main"]
     tags: ["v*"]
+    paths:
+      - package.json
+      - src/index.ts
   workflow_dispatch: {}
 
 permissions:
@@ -29,7 +33,13 @@ jobs:
       - run: bun run build
       - run: npm publish --access public
       - name: Create GitHub release
-        if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "${GITHUB_REF_NAME}" --generate-notes || true
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            TAG="$GITHUB_REF_NAME"
+          else
+            VERSION=$(node -p "require('./package.json').version")
+            TAG="v${VERSION}"
+          fi
+          gh release create "$TAG" --target "$GITHUB_SHA" --generate-notes || true
