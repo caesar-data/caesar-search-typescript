@@ -6,7 +6,6 @@ export type ClientOptions = {
 
 export type Access = {
     rate_limit: RateLimit;
-    tier: string;
 };
 
 export type CaptureHistoryEntry = {
