@@ -62,9 +62,11 @@ await caesar.search("query", { verbosity: "compact", maxCharsTotal: 4000 });
 Upload your organization's documents and search them alongside the web. `uploadFile()` presigns, PUTs the bytes straight to storage, and (by default) triggers an incremental indexing run:
 
 ```ts
+import { readFileSync } from "node:fs"; // works in Node, Bun, and Deno
+
 const upload = await caesar.uploadFile({
   filename: "report.pdf",
-  data: await Bun.file("./report.pdf").arrayBuffer(),
+  data: readFileSync("./report.pdf"),
   contentType: "application/pdf",
 });
 
