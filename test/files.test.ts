@@ -87,6 +87,33 @@ describe("files API", () => {
     }
   });
 
+  test("uploadFile computes the presign size for Blob and ArrayBuffer inputs", async () => {
+    const s3 = rawServer({ "PUT /obj": () => ({ status: 200 }) });
+    const api = rawServer({
+      "POST /v1/files/presign": () => ({ body: PRESIGN(`${s3.url}/obj`) }),
+    });
+    try {
+      const client = new Caesar({ apiKey: "test-key", baseUrl: api.url });
+
+      await client.uploadFile({
+        filename: "blob.txt",
+        data: new Blob(["12345"]),
+        index: false,
+      });
+      expect(JSON.parse(api.calls[0]?.text ?? "{}").size).toBe(5);
+
+      await client.uploadFile({
+        filename: "buffer.bin",
+        data: new TextEncoder().encode("1234567").buffer as ArrayBuffer,
+        index: false,
+      });
+      expect(JSON.parse(api.calls[1]?.text ?? "{}").size).toBe(7);
+    } finally {
+      api.stop();
+      s3.stop();
+    }
+  });
+
   test("uploadFile with index: false skips the indexing run", async () => {
     const s3 = rawServer({ "PUT /obj": () => ({ status: 200 }) });
     const api = rawServer({

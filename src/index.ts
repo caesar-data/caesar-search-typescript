@@ -203,9 +203,12 @@ function buildFeedbackBody(eventType: string, options: FeedbackOptions): Feedbac
 
 function byteLength(data: Blob | ArrayBuffer | Uint8Array | string): number {
   if (typeof data === "string") return new TextEncoder().encode(data).byteLength;
-  if (data instanceof Blob) return data.size;
-  if (data instanceof ArrayBuffer) return data.byteLength;
-  return data.byteLength;
+  // Duck-type instead of instanceof: values from another realm (an iframe, a
+  // worker boundary, Node's vm) fail instanceof checks while still satisfying
+  // the type. Property access is realm-agnostic — ArrayBuffer and typed
+  // arrays expose byteLength; Blob exposes size.
+  if ("byteLength" in data) return data.byteLength;
+  return data.size;
 }
 
 function unwrap<T>(result: { data?: T; error?: unknown; response?: Response }): {
