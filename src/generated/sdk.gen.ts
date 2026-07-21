@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { GetDocumentData, GetDocumentErrors, GetDocumentResponses, GetResearchData, GetResearchErrors, GetResearchResponses, GetSearchIntegrationResultsData, GetSearchIntegrationResultsErrors, GetSearchIntegrationResultsResponses, ListResearchData, ListResearchErrors, ListResearchResponses, RecordFeedbackData, RecordFeedbackErrors, RecordFeedbackResponses, SearchData, SearchErrors, SearchResponses, StartResearchData, StartResearchErrors, StartResearchResponses } from './types.gen';
+import type { DeleteFileData, DeleteFileErrors, DeleteFileResponses, GetDocumentData, GetDocumentErrors, GetDocumentResponses, GetFilesIndexStatusData, GetFilesIndexStatusErrors, GetFilesIndexStatusResponses, GetResearchData, GetResearchErrors, GetResearchResponses, GetSearchIntegrationResultsData, GetSearchIntegrationResultsErrors, GetSearchIntegrationResultsResponses, IndexFilesData, IndexFilesErrors, IndexFilesResponses, ListFilesData, ListFilesErrors, ListFilesResponses, ListResearchData, ListResearchErrors, ListResearchResponses, PresignFileUploadData, PresignFileUploadErrors, PresignFileUploadResponses, RecordFeedbackData, RecordFeedbackErrors, RecordFeedbackResponses, SearchData, SearchErrors, SearchResponses, StartResearchData, StartResearchErrors, StartResearchResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -46,6 +46,69 @@ export const recordFeedback = <ThrowOnError extends boolean = false>(options: Op
         'Content-Type': 'application/json',
         ...options.headers
     }
+});
+
+/**
+ * List uploaded files
+ *
+ * List the organization's uploaded files in its Files knowledge base.
+ */
+export const listFiles = <ThrowOnError extends boolean = false>(options?: Options<ListFilesData, ThrowOnError>): RequestResult<ListFilesResponses, ListFilesErrors, ThrowOnError> => (options?.client ?? client).get<ListFilesResponses, ListFilesErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/files',
+    ...options
+});
+
+/**
+ * Index uploaded files
+ *
+ * Start an indexing run over the organization's uploaded files so they become searchable in the workspace index. Poll GET /v1/files/index/{sync_id} for progress.
+ */
+export const indexFiles = <ThrowOnError extends boolean = false>(options: Options<IndexFilesData, ThrowOnError>): RequestResult<IndexFilesResponses, IndexFilesErrors, ThrowOnError> => (options.client ?? client).post<IndexFilesResponses, IndexFilesErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/files/index',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get indexing run status
+ *
+ * Progress and outcome of one files indexing run.
+ */
+export const getFilesIndexStatus = <ThrowOnError extends boolean = false>(options: Options<GetFilesIndexStatusData, ThrowOnError>): RequestResult<GetFilesIndexStatusResponses, GetFilesIndexStatusErrors, ThrowOnError> => (options.client ?? client).get<GetFilesIndexStatusResponses, GetFilesIndexStatusErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/files/index/{sync_id}',
+    ...options
+});
+
+/**
+ * Create a presigned upload URL
+ *
+ * Create a presigned S3 PUT URL for one file. Upload the raw bytes to the returned url with an HTTP PUT and no Authorization header; the body must be exactly the declared size. Then trigger POST /v1/files/index to make the file searchable via /v1/search with scope.indexes ["workspace"].
+ */
+export const presignFileUpload = <ThrowOnError extends boolean = false>(options: Options<PresignFileUploadData, ThrowOnError>): RequestResult<PresignFileUploadResponses, PresignFileUploadErrors, ThrowOnError> => (options.client ?? client).post<PresignFileUploadResponses, PresignFileUploadErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/files/presign',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete an uploaded file
+ *
+ * Delete one uploaded file by name. The document drops out of workspace search after the next indexing run (one is triggered automatically).
+ */
+export const deleteFile = <ThrowOnError extends boolean = false>(options: Options<DeleteFileData, ThrowOnError>): RequestResult<DeleteFileResponses, DeleteFileErrors, ThrowOnError> => (options.client ?? client).delete<DeleteFileResponses, DeleteFileErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/files/{name}',
+    ...options
 });
 
 /**

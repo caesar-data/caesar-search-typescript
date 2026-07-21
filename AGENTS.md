@@ -9,6 +9,7 @@ Guidance for AI agents using and maintaining `caesar-search` (TypeScript).
 - `search(query, { verbosity })` controls payload shape: `ids_only` (handles only), `compact`, `standard` (default), `full` (adds provenance). `maxCharsTotal` sets a hard response budget.
 - Set `CAESAR_API_KEY`; never hardcode keys. Catch `MissingAPIKeyError`/`AuthenticationError`/`RateLimitError`/`APIStatusError`.
 - For Vercel AI SDK agents, import `caesarTools()` from `caesar-search/ai`.
+- File uploads: `uploadFile({ filename, data })` presigns + PUTs + auto-indexes (opt out with `index: false`, then `indexFiles()` once for a batch). Manage with `listFiles()` / `deleteFile(name)` / `fileIndexStatus(syncId)`. The presigned PUT is a bare fetch — the API key is never sent to storage.
 
 ## Common mistakes
 
