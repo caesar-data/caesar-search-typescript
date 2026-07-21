@@ -57,6 +57,31 @@ Keep payloads token-efficient with `verbosity` (`ids_only` | `compact` | `standa
 await caesar.search("query", { verbosity: "compact", maxCharsTotal: 4000 });
 ```
 
+## File uploads (workspace knowledge base)
+
+Upload your organization's documents and search them alongside the web. `uploadFile()` presigns, PUTs the bytes straight to storage, and (by default) triggers an incremental indexing run:
+
+```ts
+import { readFileSync } from "node:fs"; // works in Node, Bun, and Deno
+
+const upload = await caesar.uploadFile({
+  filename: "report.pdf",
+  data: readFileSync("./report.pdf"),
+  contentType: "application/pdf",
+});
+
+// Poll until the run completes, then search your workspace.
+const status = await caesar.fileIndexStatus(upload.sync_id!);
+const hits = await caesar.search("q3 revenue", {
+  extraBody: { scope: { indexes: ["workspace"], workspace_id: "<your-org-id>" } },
+});
+
+await caesar.listFiles(); // { files: [{ name, size, last_modified }] }
+await caesar.deleteFile("report.pdf");
+```
+
+Batch several uploads with `index: false`, then call `indexFiles()` once. Supported types match the indexer (pdf, office documents, text, markdown, csv); one file may be up to the server's `max_object_bytes` (100 MB by default).
+
 ## Vercel AI SDK tools
 
 The `caesar-search/ai` subpath exports ready-made tools (requires the optional `ai` peer dependency):

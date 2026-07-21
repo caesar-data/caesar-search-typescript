@@ -244,6 +244,173 @@ export type FeedbackResponse = {
     usage?: Usage;
 };
 
+export type FileDeleteResponse = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * True when the file was removed.
+     */
+    deleted: boolean;
+};
+
+export type FileIndexRequest = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * Indexing mode. incremental (default) processes new and changed files; full reprocesses everything.
+     */
+    mode?: 'full' | 'incremental';
+};
+
+export type FileIndexResponse = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * Initial run state.
+     */
+    state: string;
+    /**
+     * Identifier of the accepted indexing run; poll GET /v1/files/index/{sync_id}.
+     */
+    sync_id: string;
+};
+
+export type FileIndexStats = {
+    /**
+     * Bytes fetched.
+     */
+    bytes: number;
+    /**
+     * Documents removed because the object is gone.
+     */
+    deleted: number;
+    /**
+     * Objects discovered.
+     */
+    enumerated: number;
+    /**
+     * Objects that failed processing.
+     */
+    failed: number;
+    /**
+     * Objects downloaded for extraction.
+     */
+    fetched: number;
+    /**
+     * Documents now searchable.
+     */
+    indexed: number;
+    /**
+     * Objects skipped as unsupported types.
+     */
+    skipped_unsupported: number;
+};
+
+export type FileIndexStatusResponse = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * Run completion time (RFC 3339), null while in flight.
+     */
+    completed_at: string | null;
+    /**
+     * Terminal error detail, null while healthy.
+     */
+    error: string | null;
+    /**
+     * Run start time (RFC 3339), null before it starts.
+     */
+    started_at: string | null;
+    /**
+     * Run state (queued, planning, running, completed, failed, …).
+     */
+    state: string;
+    /**
+     * Progress counters.
+     */
+    stats: FileIndexStats;
+    /**
+     * Indexing run identifier.
+     */
+    sync_id: string;
+};
+
+export type FileListResponse = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * The organization's uploaded files, newest first.
+     */
+    files: Array<FileSummary> | null;
+};
+
+export type FilePresignRequest = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * Optional MIME type recorded on the object.
+     */
+    content_type?: string;
+    /**
+     * Filename to upload. Sanitized server-side; the response echoes the stored name.
+     */
+    filename: string;
+    /**
+     * Exact file size in bytes. The presigned URL binds this length, so the PUT body must match it.
+     */
+    size: number;
+};
+
+export type FilePresignResponse = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * Seconds until the presigned URL expires.
+     */
+    expires_in_seconds: number;
+    /**
+     * Per-file upload size limit in bytes.
+     */
+    max_object_bytes: number;
+    /**
+     * Sanitized filename the upload will be stored and listed under.
+     */
+    name: string;
+    /**
+     * Presigned S3 PUT URL. Upload the raw file bytes to this URL with an HTTP PUT (no Authorization header); the body must be exactly the declared size.
+     */
+    url: string;
+};
+
+export type FileSummary = {
+    /**
+     * Upload time (RFC 3339).
+     */
+    last_modified?: string;
+    /**
+     * Filename.
+     */
+    name: string;
+    /**
+     * Object size in bytes.
+     */
+    size: number;
+};
+
 export type IntegrationResultsResponse = {
     /**
      * A URL to the JSON Schema for this object.
@@ -668,6 +835,99 @@ export type FeedbackResponseWritable = {
     usage?: Usage;
 };
 
+export type FileDeleteResponseWritable = {
+    /**
+     * True when the file was removed.
+     */
+    deleted: boolean;
+};
+
+export type FileIndexRequestWritable = {
+    /**
+     * Indexing mode. incremental (default) processes new and changed files; full reprocesses everything.
+     */
+    mode?: 'full' | 'incremental';
+};
+
+export type FileIndexResponseWritable = {
+    /**
+     * Initial run state.
+     */
+    state: string;
+    /**
+     * Identifier of the accepted indexing run; poll GET /v1/files/index/{sync_id}.
+     */
+    sync_id: string;
+};
+
+export type FileIndexStatusResponseWritable = {
+    /**
+     * Run completion time (RFC 3339), null while in flight.
+     */
+    completed_at: string | null;
+    /**
+     * Terminal error detail, null while healthy.
+     */
+    error: string | null;
+    /**
+     * Run start time (RFC 3339), null before it starts.
+     */
+    started_at: string | null;
+    /**
+     * Run state (queued, planning, running, completed, failed, …).
+     */
+    state: string;
+    /**
+     * Progress counters.
+     */
+    stats: FileIndexStats;
+    /**
+     * Indexing run identifier.
+     */
+    sync_id: string;
+};
+
+export type FileListResponseWritable = {
+    /**
+     * The organization's uploaded files, newest first.
+     */
+    files: Array<FileSummary> | null;
+};
+
+export type FilePresignRequestWritable = {
+    /**
+     * Optional MIME type recorded on the object.
+     */
+    content_type?: string;
+    /**
+     * Filename to upload. Sanitized server-side; the response echoes the stored name.
+     */
+    filename: string;
+    /**
+     * Exact file size in bytes. The presigned URL binds this length, so the PUT body must match it.
+     */
+    size: number;
+};
+
+export type FilePresignResponseWritable = {
+    /**
+     * Seconds until the presigned URL expires.
+     */
+    expires_in_seconds: number;
+    /**
+     * Per-file upload size limit in bytes.
+     */
+    max_object_bytes: number;
+    /**
+     * Sanitized filename the upload will be stored and listed under.
+     */
+    name: string;
+    /**
+     * Presigned S3 PUT URL. Upload the raw file bytes to this URL with an HTTP PUT (no Authorization header); the body must be exactly the declared size.
+     */
+    url: string;
+};
+
 export type IntegrationResultsResponseWritable = {
     access?: Access;
     next_cursor?: string;
@@ -908,6 +1168,257 @@ export type RecordFeedbackResponses = {
 };
 
 export type RecordFeedbackResponse = RecordFeedbackResponses[keyof RecordFeedbackResponses];
+
+export type ListFilesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/files';
+};
+
+export type ListFilesErrors = {
+    /**
+     * Missing or invalid API key.
+     */
+    401: ErrorEnvelope;
+    /**
+     * API key does not have the required scope.
+     */
+    403: ErrorEnvelope;
+    /**
+     * Rate limited.
+     */
+    429: ErrorEnvelope;
+    /**
+     * File service unreachable.
+     */
+    502: ErrorEnvelope;
+    /**
+     * File endpoints are not configured.
+     */
+    503: ErrorEnvelope;
+};
+
+export type ListFilesError = ListFilesErrors[keyof ListFilesErrors];
+
+export type ListFilesResponses = {
+    /**
+     * Uploaded files.
+     */
+    200: FileListResponse;
+};
+
+export type ListFilesResponse = ListFilesResponses[keyof ListFilesResponses];
+
+export type IndexFilesData = {
+    body: FileIndexRequestWritable;
+    headers?: {
+        /**
+         * Optional client session identifier.
+         */
+        'X-Session-ID'?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/v1/files/index';
+};
+
+export type IndexFilesErrors = {
+    /**
+     * Validation error.
+     */
+    400: ErrorEnvelope;
+    /**
+     * Missing or invalid API key.
+     */
+    401: ErrorEnvelope;
+    /**
+     * API key does not have the required scope.
+     */
+    403: ErrorEnvelope;
+    /**
+     * Rate limited.
+     */
+    429: ErrorEnvelope;
+    /**
+     * File service unreachable.
+     */
+    502: ErrorEnvelope;
+    /**
+     * File endpoints or indexing are not configured.
+     */
+    503: ErrorEnvelope;
+};
+
+export type IndexFilesError = IndexFilesErrors[keyof IndexFilesErrors];
+
+export type IndexFilesResponses = {
+    /**
+     * Indexing run accepted.
+     */
+    202: FileIndexResponse;
+};
+
+export type IndexFilesResponse = IndexFilesResponses[keyof IndexFilesResponses];
+
+export type GetFilesIndexStatusData = {
+    body?: never;
+    path: {
+        /**
+         * Indexing run identifier returned by POST /v1/files/index.
+         */
+        sync_id: string;
+    };
+    query?: never;
+    url: '/v1/files/index/{sync_id}';
+};
+
+export type GetFilesIndexStatusErrors = {
+    /**
+     * Missing or invalid API key.
+     */
+    401: ErrorEnvelope;
+    /**
+     * API key does not have the required scope.
+     */
+    403: ErrorEnvelope;
+    /**
+     * Indexing run not found.
+     */
+    404: ErrorEnvelope;
+    /**
+     * Rate limited.
+     */
+    429: ErrorEnvelope;
+    /**
+     * File service unreachable.
+     */
+    502: ErrorEnvelope;
+    /**
+     * File endpoints are not configured.
+     */
+    503: ErrorEnvelope;
+};
+
+export type GetFilesIndexStatusError = GetFilesIndexStatusErrors[keyof GetFilesIndexStatusErrors];
+
+export type GetFilesIndexStatusResponses = {
+    /**
+     * Indexing run status.
+     */
+    200: FileIndexStatusResponse;
+};
+
+export type GetFilesIndexStatusResponse = GetFilesIndexStatusResponses[keyof GetFilesIndexStatusResponses];
+
+export type PresignFileUploadData = {
+    body: FilePresignRequestWritable;
+    headers?: {
+        /**
+         * Optional client session identifier.
+         */
+        'X-Session-ID'?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/v1/files/presign';
+};
+
+export type PresignFileUploadErrors = {
+    /**
+     * Validation error.
+     */
+    400: ErrorEnvelope;
+    /**
+     * Missing or invalid API key.
+     */
+    401: ErrorEnvelope;
+    /**
+     * API key does not have the required scope.
+     */
+    403: ErrorEnvelope;
+    /**
+     * File exceeds the size limit.
+     */
+    413: ErrorEnvelope;
+    /**
+     * Unsupported file type.
+     */
+    415: ErrorEnvelope;
+    /**
+     * Rate limited.
+     */
+    429: ErrorEnvelope;
+    /**
+     * File service unreachable.
+     */
+    502: ErrorEnvelope;
+    /**
+     * File endpoints are not configured.
+     */
+    503: ErrorEnvelope;
+};
+
+export type PresignFileUploadError = PresignFileUploadErrors[keyof PresignFileUploadErrors];
+
+export type PresignFileUploadResponses = {
+    /**
+     * Presigned upload URL.
+     */
+    200: FilePresignResponse;
+};
+
+export type PresignFileUploadResponse = PresignFileUploadResponses[keyof PresignFileUploadResponses];
+
+export type DeleteFileData = {
+    body?: never;
+    path: {
+        /**
+         * Filename to delete, as returned by GET /v1/files.
+         */
+        name: string;
+    };
+    query?: never;
+    url: '/v1/files/{name}';
+};
+
+export type DeleteFileErrors = {
+    /**
+     * Validation error.
+     */
+    400: ErrorEnvelope;
+    /**
+     * Missing or invalid API key.
+     */
+    401: ErrorEnvelope;
+    /**
+     * API key does not have the required scope.
+     */
+    403: ErrorEnvelope;
+    /**
+     * Rate limited.
+     */
+    429: ErrorEnvelope;
+    /**
+     * File service unreachable.
+     */
+    502: ErrorEnvelope;
+    /**
+     * File endpoints are not configured.
+     */
+    503: ErrorEnvelope;
+};
+
+export type DeleteFileError = DeleteFileErrors[keyof DeleteFileErrors];
+
+export type DeleteFileResponses = {
+    /**
+     * File deleted.
+     */
+    200: FileDeleteResponse;
+};
+
+export type DeleteFileResponse = DeleteFileResponses[keyof DeleteFileResponses];
 
 export type ListResearchData = {
     body?: never;
