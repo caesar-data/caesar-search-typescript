@@ -722,6 +722,332 @@ export type Usage = {
     requests: number;
 };
 
+export type UsageEndpointSummary = {
+    /**
+     * 4xx/5xx responses on this route.
+     */
+    errors: number;
+    /**
+     * Human label for known routes; raw route otherwise.
+     */
+    label: string;
+    /**
+     * 95th-percentile duration on this route.
+     */
+    p95_duration_ms: number;
+    /**
+     * Requests to this route.
+     */
+    requests: number;
+    /**
+     * Public API route, e.g. /v1/search.
+     */
+    route: string;
+};
+
+export type UsageHeadline = {
+    /**
+     * Mean request duration.
+     */
+    avg_duration_ms: number;
+    /**
+     * errors / requests; 0 when there are no requests.
+     */
+    error_rate: number;
+    /**
+     * Requests that answered 4xx or 5xx.
+     */
+    errors: number;
+    /**
+     * 95th-percentile request duration.
+     */
+    p95_duration_ms: number;
+    /**
+     * Total API requests in the window.
+     */
+    requests: number;
+    /**
+     * Billable platform spend in exact (possibly fractional) cents.
+     */
+    spend_cents: number;
+};
+
+export type UsageKeySummary = {
+    /**
+     * API key identifier.
+     */
+    api_key_id: string;
+    /**
+     * 4xx/5xx responses attributed to this key.
+     */
+    errors: number;
+    /**
+     * Public key prefix (never the secret).
+     */
+    key_prefix: string;
+    /**
+     * Most recent request time (RFC 3339).
+     */
+    last_used_at: string;
+    /**
+     * Key name; deleted keys are suffixed "(deleted)".
+     */
+    name: string;
+    /**
+     * 95th-percentile duration for this key.
+     */
+    p95_duration_ms: number;
+    /**
+     * Requests attributed to this key.
+     */
+    requests: number;
+    /**
+     * Billable spend attributed to this key, exact cents.
+     */
+    spend_cents: number;
+    /**
+     * Key lifecycle state.
+     */
+    status: 'active' | 'deleted';
+};
+
+export type UsageLatencyPoint = {
+    /**
+     * Mean request duration in this bucket.
+     */
+    avg_duration_ms: number;
+    /**
+     * Bucket start (RFC 3339, UTC-aligned).
+     */
+    bucket: string;
+    /**
+     * 95th-percentile duration in this bucket.
+     */
+    p95_duration_ms: number;
+};
+
+export type UsageOverviewResponse = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * Per-route breakdown, requests desc.
+     */
+    endpoints: Array<UsageEndpointSummary> | null;
+    /**
+     * Window totals.
+     */
+    headline: UsageHeadline;
+    /**
+     * Per-API-key breakdown, requests desc.
+     */
+    keys: Array<UsageKeySummary> | null;
+    /**
+     * Latency per bucket, ungrouped.
+     */
+    latency_series: Array<UsageLatencyPoint> | null;
+    /**
+     * Billable products and spend.
+     */
+    products: Array<UsageProductSummary> | null;
+    /**
+     * The resolved query window.
+     */
+    range: UsageRange;
+    /**
+     * Requests per bucket, zero-filled.
+     */
+    series: Array<UsageSeriesPoint> | null;
+};
+
+export type UsageProductSummary = {
+    /**
+     * Human product label.
+     */
+    label: string;
+    /**
+     * Billable product identifier (web_search, document_get, research).
+     */
+    product: string;
+    /**
+     * Metered billable count.
+     */
+    requests: number;
+    /**
+     * Spend for this product in the window.
+     */
+    spend_cents: number;
+};
+
+export type UsageRange = {
+    /**
+     * Window start (RFC 3339, inclusive).
+     */
+    from: string;
+    /**
+     * Bucket size of the series.
+     */
+    interval: 'hour' | 'day';
+    /**
+     * Always UTC.
+     */
+    timezone: string;
+    /**
+     * Window end (RFC 3339, exclusive).
+     */
+    to: string;
+};
+
+export type UsageRequestFacets = {
+    /**
+     * Counts keyed by API key id.
+     */
+    api_keys: {
+        [key: string]: number;
+    };
+    /**
+     * Counts keyed by error code.
+     */
+    error_codes: {
+        [key: string]: number;
+    };
+    /**
+     * Counts keyed by HTTP method.
+     */
+    methods: {
+        [key: string]: number;
+    };
+    /**
+     * Counts keyed by route template.
+     */
+    routes: {
+        [key: string]: number;
+    };
+    /**
+     * Counts keyed all/errors/4xx/5xx/success.
+     */
+    status: {
+        [key: string]: number;
+    };
+};
+
+export type UsageRequestLogResponse = {
+    /**
+     * A URL to the JSON Schema for this object.
+     */
+    readonly $schema?: string;
+    /**
+     * Window-wide filter counts.
+     */
+    facets: UsageRequestFacets;
+    /**
+     * Cursor for the previous (newer) page; null on the newest page.
+     */
+    newer_cursor: string | null;
+    /**
+     * Cursor for the next (older) page; null when exhausted.
+     */
+    older_cursor: string | null;
+    /**
+     * Requests, newest first.
+     */
+    requests: Array<UsageRequestLogRow> | null;
+    /**
+     * Requests matching the filters across the whole window.
+     */
+    total: number;
+    /**
+     * The window actually queried.
+     */
+    window: UsageRequestLogWindow;
+};
+
+export type UsageRequestLogRow = {
+    /**
+     * API key that made the request, when attributable.
+     */
+    api_key_id: string | null;
+    /**
+     * Response body size in bytes.
+     */
+    bytes_returned: number;
+    /**
+     * When the request completed (ISO 8601, UTC).
+     */
+    created_at: string;
+    /**
+     * Server-side duration in milliseconds.
+     */
+    duration_ms: number;
+    /**
+     * Error code for failed requests; null for successes.
+     */
+    error_code: string | null;
+    /**
+     * Opaque row id.
+     */
+    id: string;
+    /**
+     * HTTP method.
+     */
+    method: string;
+    /**
+     * The request id echoed in the response envelope; quote this in support requests.
+     */
+    request_id: string;
+    /**
+     * Matched route template, e.g. /v1/research/{id}.
+     */
+    route: string;
+    /**
+     * HTTP status returned.
+     */
+    status: number;
+    /**
+     * Client user agent as sent.
+     */
+    user_agent: string | null;
+};
+
+export type UsageRequestLogWindow = {
+    /**
+     * Effective window start (ISO 8601).
+     */
+    from: string;
+    /**
+     * How many days of requests the log retains.
+     */
+    retention_days: number;
+    /**
+     * Effective window end (ISO 8601).
+     */
+    to: string;
+};
+
+export type UsageSeriesPoint = {
+    /**
+     * Bucket start (RFC 3339, UTC-aligned).
+     */
+    bucket: string;
+    /**
+     * 4xx/5xx responses in this bucket.
+     */
+    errors: number;
+    /**
+     * Group identifier when the series is grouped, null otherwise.
+     */
+    group_id: string | null;
+    /**
+     * Human label for the group, null when ungrouped.
+     */
+    group_label: string | null;
+    /**
+     * Requests in this bucket.
+     */
+    requests: number;
+};
+
 export type Warning = {
     code: string;
     details?: {
@@ -1053,6 +1379,64 @@ export type SearchResponseWritable = {
     truncated?: boolean;
     usage?: Usage;
     warnings?: Array<Warning> | null;
+};
+
+export type UsageOverviewResponseWritable = {
+    /**
+     * Per-route breakdown, requests desc.
+     */
+    endpoints: Array<UsageEndpointSummary> | null;
+    /**
+     * Window totals.
+     */
+    headline: UsageHeadline;
+    /**
+     * Per-API-key breakdown, requests desc.
+     */
+    keys: Array<UsageKeySummary> | null;
+    /**
+     * Latency per bucket, ungrouped.
+     */
+    latency_series: Array<UsageLatencyPoint> | null;
+    /**
+     * Billable products and spend.
+     */
+    products: Array<UsageProductSummary> | null;
+    /**
+     * The resolved query window.
+     */
+    range: UsageRange;
+    /**
+     * Requests per bucket, zero-filled.
+     */
+    series: Array<UsageSeriesPoint> | null;
+};
+
+export type UsageRequestLogResponseWritable = {
+    /**
+     * Window-wide filter counts.
+     */
+    facets: UsageRequestFacets;
+    /**
+     * Cursor for the previous (newer) page; null on the newest page.
+     */
+    newer_cursor: string | null;
+    /**
+     * Cursor for the next (older) page; null when exhausted.
+     */
+    older_cursor: string | null;
+    /**
+     * Requests, newest first.
+     */
+    requests: Array<UsageRequestLogRow> | null;
+    /**
+     * Requests matching the filters across the whole window.
+     */
+    total: number;
+    /**
+     * The window actually queried.
+     */
+    window: UsageRequestLogWindow;
 };
 
 export type GetDocumentData = {
@@ -1438,6 +1822,10 @@ export type ListResearchErrors = {
      */
     401: ErrorEnvelope;
     /**
+     * API key does not have the required scope.
+     */
+    403: ErrorEnvelope;
+    /**
      * Rate limited.
      */
     429: ErrorEnvelope;
@@ -1522,6 +1910,10 @@ export type GetResearchErrors = {
      * Invalid API key, or missing API key when keyless access is disabled.
      */
     401: ErrorEnvelope;
+    /**
+     * API key does not have the required scope.
+     */
+    403: ErrorEnvelope;
     /**
      * Research job not found.
      */
@@ -1660,3 +2052,163 @@ export type GetSearchIntegrationResultsResponses = {
 };
 
 export type GetSearchIntegrationResultsResponse = GetSearchIntegrationResultsResponses[keyof GetSearchIntegrationResultsResponses];
+
+export type GetUsageData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Window start (ISO 8601). Default: 30 days before to.
+         */
+        from?: string;
+        /**
+         * Window end (ISO 8601). Default: now.
+         */
+        to?: string;
+        /**
+         * Bucket size for the series. Default day; hour requires a range of at most 8 days.
+         */
+        interval?: '' | 'hour' | 'day';
+        /**
+         * Comma-separated API key uuids to filter by (at most 50).
+         */
+        api_key_ids?: string;
+        /**
+         * Optional grouping of the request series.
+         */
+        group_by?: '' | 'none' | 'api_key' | 'endpoint' | 'status_class';
+    };
+    url: '/v1/usage';
+};
+
+export type GetUsageErrors = {
+    /**
+     * Invalid range or filter.
+     */
+    400: ErrorEnvelope;
+    /**
+     * Missing or invalid API key.
+     */
+    401: ErrorEnvelope;
+    /**
+     * API key does not have the required scope.
+     */
+    403: ErrorEnvelope;
+    /**
+     * Rate limited.
+     */
+    429: ErrorEnvelope;
+    /**
+     * Usage service unreachable.
+     */
+    502: ErrorEnvelope;
+    /**
+     * Usage endpoint is not configured.
+     */
+    503: ErrorEnvelope;
+};
+
+export type GetUsageError = GetUsageErrors[keyof GetUsageErrors];
+
+export type GetUsageResponses = {
+    /**
+     * Organization usage overview.
+     */
+    200: UsageOverviewResponse;
+};
+
+export type GetUsageResponse = GetUsageResponses[keyof GetUsageResponses];
+
+export type ListUsageRequestsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Window start (ISO 8601). Raised to the retention floor when older. Default: the retention floor.
+         */
+        from?: string;
+        /**
+         * Window end (ISO 8601). Default: now.
+         */
+        to?: string;
+        /**
+         * Comma-separated API key uuids to filter by (at most 50).
+         */
+        api_key_ids?: string;
+        /**
+         * Comma-separated route templates to filter by (at most 50).
+         */
+        routes?: string;
+        /**
+         * Comma-separated HTTP methods to filter by (at most 50).
+         */
+        methods?: string;
+        /**
+         * Comma-separated error codes to filter by (at most 50).
+         */
+        error_codes?: string;
+        /**
+         * Status filter. Default all.
+         */
+        status?: '' | 'all' | 'errors' | '4xx' | '5xx' | 'success';
+        /**
+         * Sort order. Default newest.
+         */
+        sort?: '' | 'newest' | 'oldest' | 'slowest' | 'fastest';
+        /**
+         * Return only the request with this id.
+         */
+        request_id?: string;
+        /**
+         * Opaque cursor from a previous response.
+         */
+        cursor?: string;
+        /**
+         * Page size, 1-200. Default 50.
+         */
+        limit?: number;
+        /**
+         * Set 0 to omit the window-wide filter counts. Default 1.
+         */
+        facets?: '' | '0' | '1';
+    };
+    url: '/v1/usage/requests';
+};
+
+export type ListUsageRequestsErrors = {
+    /**
+     * Invalid range, filter, or cursor.
+     */
+    400: ErrorEnvelope;
+    /**
+     * Missing or invalid API key.
+     */
+    401: ErrorEnvelope;
+    /**
+     * API key does not have the required scope, or carries no organization.
+     */
+    403: ErrorEnvelope;
+    /**
+     * Rate limited.
+     */
+    429: ErrorEnvelope;
+    /**
+     * Usage service unreachable.
+     */
+    502: ErrorEnvelope;
+    /**
+     * Usage endpoint is not configured.
+     */
+    503: ErrorEnvelope;
+};
+
+export type ListUsageRequestsError = ListUsageRequestsErrors[keyof ListUsageRequestsErrors];
+
+export type ListUsageRequestsResponses = {
+    /**
+     * One page of the request log.
+     */
+    200: UsageRequestLogResponse;
+};
+
+export type ListUsageRequestsResponse = ListUsageRequestsResponses[keyof ListUsageRequestsResponses];
