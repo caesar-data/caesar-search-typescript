@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteFileData, DeleteFileErrors, DeleteFileResponses, GetDocumentData, GetDocumentErrors, GetDocumentResponses, GetFilesIndexStatusData, GetFilesIndexStatusErrors, GetFilesIndexStatusResponses, GetResearchData, GetResearchErrors, GetResearchResponses, GetSearchIntegrationResultsData, GetSearchIntegrationResultsErrors, GetSearchIntegrationResultsResponses, IndexFilesData, IndexFilesErrors, IndexFilesResponses, ListFilesData, ListFilesErrors, ListFilesResponses, ListResearchData, ListResearchErrors, ListResearchResponses, PresignFileUploadData, PresignFileUploadErrors, PresignFileUploadResponses, RecordFeedbackData, RecordFeedbackErrors, RecordFeedbackResponses, SearchData, SearchErrors, SearchResponses, StartResearchData, StartResearchErrors, StartResearchResponses } from './types.gen';
+import type { DeleteFileData, DeleteFileErrors, DeleteFileResponses, GetDocumentData, GetDocumentErrors, GetDocumentResponses, GetFilesIndexStatusData, GetFilesIndexStatusErrors, GetFilesIndexStatusResponses, GetResearchData, GetResearchErrors, GetResearchResponses, GetSearchIntegrationResultsData, GetSearchIntegrationResultsErrors, GetSearchIntegrationResultsResponses, GetUsageData, GetUsageErrors, GetUsageResponses, IndexFilesData, IndexFilesErrors, IndexFilesResponses, ListFilesData, ListFilesErrors, ListFilesResponses, ListResearchData, ListResearchErrors, ListResearchResponses, ListUsageRequestsData, ListUsageRequestsErrors, ListUsageRequestsResponses, PresignFileUploadData, PresignFileUploadErrors, PresignFileUploadResponses, RecordFeedbackData, RecordFeedbackErrors, RecordFeedbackResponses, SearchData, SearchErrors, SearchResponses, StartResearchData, StartResearchErrors, StartResearchResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -171,5 +171,27 @@ export const search = <ThrowOnError extends boolean = false>(options: Options<Se
 export const getSearchIntegrationResults = <ThrowOnError extends boolean = false>(options: Options<GetSearchIntegrationResultsData, ThrowOnError>): RequestResult<GetSearchIntegrationResultsResponses, GetSearchIntegrationResultsErrors, ThrowOnError> => (options.client ?? client).get<GetSearchIntegrationResultsResponses, GetSearchIntegrationResultsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/search/{search_id}/integration-results',
+    ...options
+});
+
+/**
+ * Get organization usage
+ *
+ * Usage analytics for the API key's organization: request and error totals, latency, per-key and per-endpoint breakdowns, and billable product spend. Defaults to the last 30 days in day buckets (UTC).
+ */
+export const getUsage = <ThrowOnError extends boolean = false>(options?: Options<GetUsageData, ThrowOnError>): RequestResult<GetUsageResponses, GetUsageErrors, ThrowOnError> => (options?.client ?? client).get<GetUsageResponses, GetUsageErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/usage',
+    ...options
+});
+
+/**
+ * List organization requests
+ *
+ * Individual API requests for the key's organization, with window-wide filter counts. Cursor-paginated. Covers the configured retention window, reported as retention_days in the response, which may be shorter than the aggregate usage window.
+ */
+export const listUsageRequests = <ThrowOnError extends boolean = false>(options?: Options<ListUsageRequestsData, ThrowOnError>): RequestResult<ListUsageRequestsResponses, ListUsageRequestsErrors, ThrowOnError> => (options?.client ?? client).get<ListUsageRequestsResponses, ListUsageRequestsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/usage/requests',
     ...options
 });
